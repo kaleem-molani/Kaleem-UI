@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Badge, Button, IconButton, Checkbox, InlineAlert } from '../primitives';
+import { Badge, Button, IconButton, Checkbox, InlineAlert, Pagination } from '../primitives';
 import {
   PlusIcon,
   RefreshIcon,
@@ -9,6 +9,9 @@ import {
   CopyIcon,
   TrashIcon,
   CheckIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
+  ArrowUpDownIcon,
 } from '../common/Icons';
 
 export interface SecretItem {
@@ -81,6 +84,10 @@ export const DataTablePattern: React.FC<{
   const [searchQuery, setSearchQuery] = useState('');
   const [envFilter, setEnvFilter] = useState<'All' | 'Production' | 'Staging' | 'Development'>('All');
   const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(3);
+  const [sortField, setSortField] = useState<'name' | 'environment' | 'createdDate'>('name');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   const filteredData = data.filter((item) => {
     const matchesSearch =
@@ -90,11 +97,32 @@ export const DataTablePattern: React.FC<{
     return matchesSearch && matchesEnv;
   });
 
+  const sortedData = [...filteredData].sort((a, b) => {
+    const aVal = a[sortField];
+    const bVal = b[sortField];
+    const cmp = String(aVal).localeCompare(String(bVal));
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(sortedData.length / pageSize));
+  const safePage = Math.min(Math.max(1, currentPage), totalPages);
+  const paginatedData = sortedData.slice((safePage - 1) * pageSize, safePage * pageSize);
+
+  const handleSortToggle = (field: 'name' | 'environment' | 'createdDate') => {
+    if (sortField === field) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortDir('asc');
+    }
+    setCurrentPage(1);
+  };
+
   const toggleSelectAll = () => {
-    if (selectedIds.length === filteredData.length) {
+    if (selectedIds.length === paginatedData.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredData.map((d) => d.id));
+      setSelectedIds(paginatedData.map((d) => d.id));
     }
   };
 
@@ -269,25 +297,103 @@ export const DataTablePattern: React.FC<{
                 <th style={{ width: '40px', padding: 'var(--kui-space-3) var(--kui-space-4)' }}>
                   <Checkbox
                     label=""
-                    checked={selectedIds.length === filteredData.length && filteredData.length > 0}
+                    checked={selectedIds.length === paginatedData.length && paginatedData.length > 0}
                     onChange={toggleSelectAll}
                     aria-label="Select all rows"
                   />
                 </th>
-                <th style={{ padding: 'var(--kui-space-3) var(--kui-space-3)', fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)' }}>
-                  Key Name
+                <th
+                  scope="col"
+                  aria-sort={sortField === 'name' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  style={{ padding: '6px 8px', fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)' }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleSortToggle('name')}
+                    aria-label={`Sort by Key Name, currently ${sortField === 'name' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'unsorted'}`}
+                    style={{
+                      all: 'unset',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '4px 6px',
+                      borderRadius: 'var(--kui-radius-sm)',
+                      cursor: 'pointer',
+                      color: sortField === 'name' ? 'var(--kui-color-brand-primary)' : 'inherit',
+                      fontWeight: sortField === 'name' ? 'var(--kui-font-weight-semibold)' : 'inherit',
+                    }}
+                  >
+                    <span>Key Name</span>
+                    {sortField === 'name' ? (
+                      sortDir === 'asc' ? <ArrowUpIcon size={12} /> : <ArrowDownIcon size={12} />
+                    ) : (
+                      <ArrowUpDownIcon size={12} style={{ opacity: 0.4 }} />
+                    )}
+                  </button>
                 </th>
                 <th style={{ padding: 'var(--kui-space-3) var(--kui-space-3)', fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)' }}>
                   Token Prefix
                 </th>
-                <th style={{ padding: 'var(--kui-space-3) var(--kui-space-3)', fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)' }}>
-                  Target
+                <th
+                  scope="col"
+                  aria-sort={sortField === 'environment' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  style={{ padding: '6px 8px', fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)' }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleSortToggle('environment')}
+                    aria-label={`Sort by Environment, currently ${sortField === 'environment' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'unsorted'}`}
+                    style={{
+                      all: 'unset',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '4px 6px',
+                      borderRadius: 'var(--kui-radius-sm)',
+                      cursor: 'pointer',
+                      color: sortField === 'environment' ? 'var(--kui-color-brand-primary)' : 'inherit',
+                      fontWeight: sortField === 'environment' ? 'var(--kui-font-weight-semibold)' : 'inherit',
+                    }}
+                  >
+                    <span>Target</span>
+                    {sortField === 'environment' ? (
+                      sortDir === 'asc' ? <ArrowUpIcon size={12} /> : <ArrowDownIcon size={12} />
+                    ) : (
+                      <ArrowUpDownIcon size={12} style={{ opacity: 0.4 }} />
+                    )}
+                  </button>
                 </th>
                 <th style={{ padding: 'var(--kui-space-3) var(--kui-space-3)', fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)' }}>
                   Status
                 </th>
-                <th style={{ padding: 'var(--kui-space-3) var(--kui-space-3)', fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)' }}>
-                  Last Used
+                <th
+                  scope="col"
+                  aria-sort={sortField === 'createdDate' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  style={{ padding: '6px 8px', fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)' }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleSortToggle('createdDate')}
+                    aria-label={`Sort by Created Date, currently ${sortField === 'createdDate' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'unsorted'}`}
+                    style={{
+                      all: 'unset',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '4px 6px',
+                      borderRadius: 'var(--kui-radius-sm)',
+                      cursor: 'pointer',
+                      color: sortField === 'createdDate' ? 'var(--kui-color-brand-primary)' : 'inherit',
+                      fontWeight: sortField === 'createdDate' ? 'var(--kui-font-weight-semibold)' : 'inherit',
+                    }}
+                  >
+                    <span>Last Used</span>
+                    {sortField === 'createdDate' ? (
+                      sortDir === 'asc' ? <ArrowUpIcon size={12} /> : <ArrowDownIcon size={12} />
+                    ) : (
+                      <ArrowUpDownIcon size={12} style={{ opacity: 0.4 }} />
+                    )}
+                  </button>
                 </th>
                 <th style={{ padding: 'var(--kui-space-3) var(--kui-space-4)', textAlign: 'right', fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)' }}>
                   Actions
@@ -295,14 +401,14 @@ export const DataTablePattern: React.FC<{
               </tr>
             </thead>
             <tbody>
-              {filteredData.length === 0 ? (
+              {paginatedData.length === 0 ? (
                 <tr>
                   <td colSpan={7} style={{ padding: 'var(--kui-space-8)', textAlign: 'center', color: 'var(--kui-color-text-muted)', fontSize: 'var(--kui-font-size-xs)' }}>
                     No matching credentials for query "{searchQuery}"
                   </td>
                 </tr>
               ) : (
-                filteredData.map((item) => {
+                paginatedData.map((item) => {
                   const isSelected = selectedIds.includes(item.id);
                   const isCopied = copiedKeyId === item.id;
                   return (
@@ -382,12 +488,14 @@ export const DataTablePattern: React.FC<{
           </table>
         </div>
 
-        {/* Table Footer */}
+        {/* Table Footer with Pagination */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 'var(--kui-space-3)',
             padding: 'var(--kui-space-3) var(--kui-space-4)',
             backgroundColor: 'var(--kui-color-surface-subtle)',
             fontSize: 'var(--kui-font-size-xs)',
@@ -395,18 +503,23 @@ export const DataTablePattern: React.FC<{
             borderTop: '1px solid var(--kui-color-border)',
           }}
         >
-          <span>
-            Showing {filteredData.length} of {data.length} keys &bull;{' '}
-            <strong style={{ color: 'var(--kui-color-text-primary)' }}>{selectedIds.length}</strong> selected
-          </span>
-          <div style={{ display: 'flex', gap: 'var(--kui-space-2)' }}>
-            <Button variant="outline" size="sm" disabled>
-              Previous
-            </Button>
-            <Button variant="outline" size="sm" disabled>
-              Next
-            </Button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--kui-space-2)' }}>
+            <span>
+              <strong style={{ color: 'var(--kui-color-text-primary)' }}>{selectedIds.length}</strong> selected
+            </span>
           </div>
+          <Pagination
+            currentPage={safePage}
+            totalPages={totalPages}
+            totalItems={sortedData.length}
+            pageSize={pageSize}
+            pageSizeOptions={[3, 5, 10]}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+          />
         </div>
       </div>
     </div>

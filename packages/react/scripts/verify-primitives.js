@@ -36,6 +36,8 @@ const expectedExports = [
   'SearchField',
   'FilterBar',
   'DataTable',
+  'paginateAndSortData',
+  'Pagination',
   'EmptyState',
   'ConfirmationDialog',
   'Toast',
@@ -46,7 +48,11 @@ const expectedExports = [
   'MoonIcon',
   'MonitorIcon',
   'CheckIcon',
-  'AlertCircleIcon'
+  'AlertCircleIcon',
+  'ChevronLeftIcon',
+  'ArrowUpIcon',
+  'ArrowDownIcon',
+  'ArrowUpDownIcon'
 ];
 
 for (const name of expectedExports) {

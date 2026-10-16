@@ -1,6 +1,14 @@
 import React from 'react';
 import { Checkbox } from '../primitives/FormControls.js';
 import { Spinner } from '../primitives/Feedback.js';
+import { ArrowUpIcon, ArrowDownIcon, ArrowUpDownIcon } from '../common/Icons.js';
+
+export type SortDirection = 'asc' | 'desc';
+
+export interface SortConfig {
+  key: string;
+  direction: SortDirection;
+}
 
 export interface DataTableColumn<T> {
   key: string;
@@ -8,6 +16,7 @@ export interface DataTableColumn<T> {
   render?: (item: T) => React.ReactNode;
   width?: string;
   align?: 'left' | 'center' | 'right';
+  sortable?: boolean;
 }
 
 export interface DataTableProps<T> {
@@ -21,6 +30,9 @@ export interface DataTableProps<T> {
   selectedKeys?: string[];
   onSelectionChange?: (selectedKeys: string[]) => void;
   ariaLabel?: string;
+  sortConfig?: SortConfig;
+  onSortChange?: (sortConfig: SortConfig) => void;
+  pagination?: React.ReactNode;
 }
 
 export function DataTable<T>({
@@ -34,9 +46,27 @@ export function DataTable<T>({
   selectedKeys = [],
   onSelectionChange,
   ariaLabel = 'Data table',
+  sortConfig,
+  onSortChange,
+  pagination,
 }: DataTableProps<T>): React.ReactElement {
   const allSelected = data.length > 0 && selectedKeys.length === data.length;
   const someSelected = selectedKeys.length > 0 && selectedKeys.length < data.length;
+
+  const handleHeaderClick = (col: DataTableColumn<T>) => {
+    if (!col.sortable || !onSortChange) return;
+    if (sortConfig && sortConfig.key === col.key) {
+      onSortChange({
+        key: col.key,
+        direction: sortConfig.direction === 'asc' ? 'desc' : 'asc',
+      });
+    } else {
+      onSortChange({
+        key: col.key,
+        direction: 'asc',
+      });
+    }
+  };
 
   const handleSelectAll = (checked: boolean) => {
     if (!onSelectionChange) return;
@@ -97,24 +127,78 @@ export function DataTable<T>({
                 />
               </th>
             )}
-            {columns.map((col) => (
-              <th
-                key={col.key}
-                scope="col"
-                style={{
-                  padding: '10px 14px',
-                  fontWeight: 'var(--kui-font-weight-semibold)',
-                  color: 'var(--kui-color-text-secondary)',
-                  fontSize: 'var(--kui-font-size-xs)',
-                  letterSpacing: 'var(--kui-letter-spacing-wide)',
-                  textTransform: 'uppercase',
-                  width: col.width,
-                  textAlign: col.align || 'left',
-                }}
-              >
-                {col.header}
-              </th>
-            ))}
+            {columns.map((col) => {
+              const isSorted = sortConfig?.key === col.key;
+              const sortAria = col.sortable
+                ? isSorted
+                  ? sortConfig.direction === 'asc'
+                    ? 'ascending'
+                    : 'descending'
+                  : 'none'
+                : undefined;
+
+              return (
+                <th
+                  key={col.key}
+                  scope="col"
+                  aria-sort={sortAria}
+                  style={{
+                    padding: col.sortable ? '6px 8px' : '10px 14px',
+                    fontWeight: 'var(--kui-font-weight-semibold)',
+                    color: 'var(--kui-color-text-secondary)',
+                    fontSize: 'var(--kui-font-size-xs)',
+                    letterSpacing: 'var(--kui-letter-spacing-wide)',
+                    textTransform: 'uppercase',
+                    width: col.width,
+                    textAlign: col.align || 'left',
+                  }}
+                >
+                  {col.sortable ? (
+                    <button
+                      type="button"
+                      onClick={() => handleHeaderClick(col)}
+                      aria-label={`Sort by ${col.header}${isSorted ? `, currently ${sortConfig?.direction === 'asc' ? 'ascending' : 'descending'}` : ''}`}
+                      style={{
+                        all: 'unset',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '4px 6px',
+                        borderRadius: 'var(--kui-radius-sm)',
+                        cursor: 'pointer',
+                        fontWeight: 'inherit',
+                        color: isSorted ? 'var(--kui-color-brand-primary)' : 'inherit',
+                        fontSize: 'inherit',
+                        letterSpacing: 'inherit',
+                        textTransform: 'inherit',
+                        transition: 'background-color 100ms ease, color 100ms ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = 'var(--kui-color-surface-hover)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
+                    >
+                      <span>{col.header}</span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                        {isSorted ? (
+                          sortConfig?.direction === 'asc' ? (
+                            <ArrowUpIcon size={13} />
+                          ) : (
+                            <ArrowDownIcon size={13} />
+                          )
+                        ) : (
+                          <ArrowUpDownIcon size={13} style={{ opacity: 0.4 }} />
+                        )}
+                      </span>
+                    </button>
+                  ) : (
+                    col.header
+                  )}
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody>
@@ -202,6 +286,48 @@ export function DataTable<T>({
           )}
         </tbody>
       </table>
+      {pagination && (
+        <div
+          style={{
+            borderTop: '1px solid var(--kui-color-border)',
+            padding: '12px 16px',
+            backgroundColor: 'var(--kui-color-surface-subtle)',
+          }}
+        >
+          {pagination}
+        </div>
+      )}
     </div>
   );
+}
+
+export function paginateAndSortData<T>(
+  items: T[],
+  sortConfig?: SortConfig,
+  currentPage = 1,
+  pageSize = 10
+): { paginatedData: T[]; totalPages: number; totalItems: number } {
+  const result = [...items];
+
+  if (sortConfig) {
+    result.sort((a, b) => {
+      const aVal = (a as Record<string, unknown>)[sortConfig.key];
+      const bVal = (b as Record<string, unknown>)[sortConfig.key];
+
+      if (aVal === bVal) return 0;
+      if (aVal == null) return 1;
+      if (bVal == null) return -1;
+
+      const comparison = String(aVal).localeCompare(String(bVal), undefined, { numeric: true });
+      return sortConfig.direction === 'asc' ? comparison : -comparison;
+    });
+  }
+
+  const totalItems = result.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const safePage = Math.min(Math.max(1, currentPage), totalPages);
+  const start = (safePage - 1) * pageSize;
+  const paginatedData = result.slice(start, start + pageSize);
+
+  return { paginatedData, totalPages, totalItems };
 }

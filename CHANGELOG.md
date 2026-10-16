@@ -5,6 +5,16 @@ All notable changes to the Kaleem UI design system and component libraries are d
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **`Pagination` Primitive**: Accessible multi-page navigation component supporting page truncation dots (`getPaginationRange`), `aria-current="page"`, next/previous controls, customizable `pageSizeOptions`, and items range summary.
+- **`DataTable` Sorting & Pagination**:
+  - Added `sortable?: boolean` to `DataTableColumn<T>` with interactive column header buttons, sort direction arrows (`ArrowUpIcon`, `ArrowDownIcon`, `ArrowUpDownIcon`), and accessible `aria-sort="ascending" | "descending" | "none"`.
+  - Added optional integrated `pagination` container slot at table footer.
+  - Exported `paginateAndSortData` client-side sorting and slicing helper function.
+- **Icons**: Added `ChevronLeftIcon`, `ArrowUpIcon`, `ArrowDownIcon`, and `ArrowUpDownIcon` to `@kaleem-ui/react`.
+
 ## [1.0.0] - 2026-10-17
 
 ### Added

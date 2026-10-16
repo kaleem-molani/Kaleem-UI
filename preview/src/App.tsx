@@ -36,6 +36,9 @@ import {
   FilterBar,
   SearchField,
   DataTable,
+  paginateAndSortData,
+  type SortConfig,
+  Pagination,
   EmptyState,
   ConfirmationDialog,
   Toast,
@@ -91,6 +94,9 @@ const PreviewContent: React.FC = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [filterSearch, setFilterSearch] = useState('');
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>(['k1']);
+  const [tableSort, setTableSort] = useState<SortConfig>({ key: 'name', direction: 'asc' });
+  const [tablePage, setTablePage] = useState(1);
+  const [tablePageSize, setTablePageSize] = useState(2);
 
   // Escape key handler for dialog and mobile drawer
   useEffect(() => {
@@ -1030,40 +1036,97 @@ const PreviewContent: React.FC = () => {
                       />
                     </div>
 
-                    {/* Generic DataTable Pattern */}
+                    {/* Generic DataTable Pattern with Sorting & Integrated Pagination */}
                     <div style={{ borderTop: '1px solid var(--kui-color-border)', paddingTop: 'var(--kui-space-3)' }}>
                       <span style={{ fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)', display: 'block', marginBottom: 'var(--kui-space-2)' }}>
-                        Reusable DataTable with Selection:
+                        Reusable DataTable (Sortable Columns, Row Selection & Integrated Pagination):
                       </span>
-                      <DataTable
-                        data={[
+                      {(() => {
+                        const rawData = [
                           { id: 'k1', name: 'Ingress Proxy Token', env: 'Production', status: 'Active' },
                           { id: 'k2', name: 'Billing Hook Signer', env: 'Production', status: 'Expiring' },
                           { id: 'k3', name: 'Local Worker Key', env: 'Development', status: 'Revoked' },
-                        ]}
-                        keyExtractor={(item) => item.id}
-                        selectable
-                        selectedKeys={selectedRowKeys}
-                        onSelectionChange={setSelectedRowKeys}
-                        columns={[
-                          { key: 'name', header: 'Key Name' },
-                          { key: 'env', header: 'Environment', width: '140px' },
-                          {
-                            key: 'status',
-                            header: 'Status',
-                            width: '120px',
-                            render: (item) => (
-                              <Badge
-                                variant={item.status === 'Active' ? 'success' : item.status === 'Expiring' ? 'warning' : 'danger'}
-                                dot
-                                size="sm"
-                              >
-                                {item.status}
-                              </Badge>
-                            ),
-                          },
-                        ]}
-                      />
+                          { id: 'k4', name: 'Analytics Pipeline Key', env: 'Staging', status: 'Active' },
+                          { id: 'k5', name: 'Audit Log Forwarder', env: 'Production', status: 'Active' },
+                          { id: 'k6', name: 'Edge CDN Signer', env: 'Staging', status: 'Active' },
+                        ];
+                        const { paginatedData, totalPages, totalItems } = paginateAndSortData(
+                          rawData,
+                          tableSort,
+                          tablePage,
+                          tablePageSize
+                        );
+
+                        return (
+                          <DataTable
+                            data={paginatedData}
+                            keyExtractor={(item) => item.id}
+                            selectable
+                            selectedKeys={selectedRowKeys}
+                            onSelectionChange={setSelectedRowKeys}
+                            sortConfig={tableSort}
+                            onSortChange={(newSort) => {
+                              setTableSort(newSort);
+                              setTablePage(1);
+                            }}
+                            columns={[
+                              { key: 'name', header: 'Key Name', sortable: true },
+                              { key: 'env', header: 'Environment', width: '150px', sortable: true },
+                              {
+                                key: 'status',
+                                header: 'Status',
+                                width: '130px',
+                                render: (item) => (
+                                  <Badge
+                                    variant={item.status === 'Active' ? 'success' : item.status === 'Expiring' ? 'warning' : 'danger'}
+                                    dot
+                                    size="sm"
+                                  >
+                                    {item.status}
+                                  </Badge>
+                                ),
+                              },
+                            ]}
+                            pagination={
+                              <Pagination
+                                currentPage={tablePage}
+                                totalPages={totalPages}
+                                totalItems={totalItems}
+                                pageSize={tablePageSize}
+                                pageSizeOptions={[2, 4, 6]}
+                                onPageChange={setTablePage}
+                                onPageSizeChange={(newSize) => {
+                                  setTablePageSize(newSize);
+                                  setTablePage(1);
+                                }}
+                              />
+                            }
+                          />
+                        );
+                      })()}
+                    </div>
+
+                    {/* Standalone Pagination Primitive */}
+                    <div style={{ borderTop: '1px solid var(--kui-color-border)', paddingTop: 'var(--kui-space-3)' }}>
+                      <span style={{ fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)', display: 'block', marginBottom: 'var(--kui-space-2)' }}>
+                        Pagination Primitive (Standalone with Truncation Dots):
+                      </span>
+                      <div
+                        style={{
+                          padding: 'var(--kui-space-3)',
+                          backgroundColor: 'var(--kui-color-surface)',
+                          border: '1px solid var(--kui-color-border)',
+                          borderRadius: 'var(--kui-radius-md)',
+                        }}
+                      >
+                        <Pagination
+                          currentPage={5}
+                          totalPages={12}
+                          totalItems={120}
+                          pageSize={10}
+                          onPageChange={() => {}}
+                        />
+                      </div>
                     </div>
 
                     {/* EmptyState Pattern */}

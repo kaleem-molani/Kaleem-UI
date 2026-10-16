@@ -13,6 +13,7 @@ import {
   Accordion,
   Breadcrumbs,
   DataTable,
+  Pagination,
   Spinner,
   InlineAlert,
   Toast,
@@ -162,23 +163,28 @@ console.log('--- Running Accessibility & ARIA Contract Verification ---');
   console.log('[PASS] Breadcrumbs hierarchy and aria-current contracts');
 }
 
-// 11. DataTable contract (semantic table, row selection)
+// 11. DataTable contract (semantic table, row selection, sorting, pagination slot)
 {
   const html = renderToString(React.createElement(DataTable, {
     data: [{ id: '1', name: 'Gateway 1', status: 'Active' }],
     keyExtractor: (item) => item.id,
     selectable: true,
     selectedKeys: ['1'],
+    sortConfig: { key: 'name', direction: 'asc' },
     columns: [
-      { key: 'name', header: 'Node Name' },
+      { key: 'name', header: 'Node Name', sortable: true },
       { key: 'status', header: 'Status' },
     ],
+    pagination: React.createElement('div', { id: 'table-pagination-test' }, 'Pagination Slot'),
   }));
   assert(html.includes('<table'), 'DataTable must render semantic <table> element');
   assert(html.includes('<thead'), 'DataTable must render <thead>');
   assert(html.includes('<tbody'), 'DataTable must render <tbody>');
   assert(html.includes('aria-selected="true"'), 'Selected table row must set aria-selected="true"');
-  console.log('[PASS] DataTable semantic structure and selection contracts');
+  assert(html.includes('aria-sort="ascending"'), 'Sorted column must set aria-sort="ascending"');
+  assert(html.includes('Sort by Node Name'), 'Sortable column header must have descriptive aria-label');
+  assert(html.includes('id="table-pagination-test"'), 'DataTable must render pagination container when passed');
+  console.log('[PASS] DataTable semantic structure, sorting, and pagination contracts');
 }
 
 // 12. Spinner & Feedback contracts
@@ -195,4 +201,25 @@ console.log('--- Running Accessibility & ARIA Contract Verification ---');
   console.log('[PASS] Spinner, InlineAlert, and Toast live region contracts');
 }
 
-console.log('✓ All 12 accessibility & ARIA contracts verified successfully.');
+// 13. Pagination primitive contract
+{
+  const pagHtml = renderToString(React.createElement(Pagination, {
+    currentPage: 2,
+    totalPages: 5,
+    totalItems: 48,
+    pageSize: 10,
+    pageSizeOptions: [10, 25, 50],
+    onPageChange: () => {},
+    onPageSizeChange: () => {},
+    ariaLabel: 'Key list pagination',
+  }));
+  assert(pagHtml.includes('<nav'), 'Pagination must be wrapped in a <nav> landmark');
+  assert(pagHtml.includes('aria-label="Key list pagination"'), 'Pagination must have an accessible label');
+  assert(pagHtml.includes('aria-current="page"'), 'Active page must have aria-current="page"');
+  assert(pagHtml.includes('aria-label="Previous page"'), 'Previous button must have aria-label');
+  assert(pagHtml.includes('aria-label="Next page"'), 'Next button must have aria-label');
+  assert(pagHtml.includes('Rows per page'), 'Page size dropdown must have accessible label');
+  console.log('[PASS] Pagination navigation and aria-current contracts');
+}
+
+console.log('✓ All 13 accessibility & ARIA contracts verified successfully.');

@@ -14,3 +14,4 @@ export * from './Popover.js';
 export * from './DropdownMenu.js';
 export * from './Tabs.js';
 export * from './Accordion.js';
+export * from './Pagination.js';
