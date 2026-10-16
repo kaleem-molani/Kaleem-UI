@@ -42,6 +42,15 @@ import {
   EmptyState,
   ConfirmationDialog,
   Toast,
+  ToastProvider,
+  useToast,
+  MetricCard,
+  Timeline,
+  Stepper,
+  ChartContainer,
+  Sparkline,
+  BarChart,
+  DonutChart,
 } from '@kaleem-ui/react';
 import {
   DataTablePattern,
@@ -97,6 +106,8 @@ const PreviewContent: React.FC = () => {
   const [tableSort, setTableSort] = useState<SortConfig>({ key: 'name', direction: 'asc' });
   const [tablePage, setTablePage] = useState(1);
   const [tablePageSize, setTablePageSize] = useState(2);
+  const [stepperStep, setStepperStep] = useState(1);
+  const toast = useToast();
 
   // Escape key handler for dialog and mobile drawer
   useEffect(() => {
@@ -1167,6 +1178,214 @@ const PreviewContent: React.FC = () => {
                         onCancel={() => setIsConfirmOpen(false)}
                       />
                     </div>
+
+                    {/* Interactive Toast Dispatcher */}
+                    <div style={{ borderTop: '1px solid var(--kui-color-border)', paddingTop: 'var(--kui-space-3)' }}>
+                      <span style={{ fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)', display: 'block', marginBottom: 'var(--kui-space-2)' }}>
+                        Interactive Application-Wide Toast Dispatcher (useToast hook):
+                      </span>
+                      <Inline gap={2} wrap>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toast.success('API credential rotated successfully', 'Secret Synchronized')}
+                        >
+                          Trigger Success Toast
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toast.error('HMAC token mismatch from ingress peer', 'Authentication Failure')}
+                        >
+                          Trigger Error Toast
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toast.warning('Production signing key expires in 24 hours', 'Key Expiration Warning')}
+                        >
+                          Trigger Warning Toast
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toast.info('Cluster health check completed with 0 errors.', 'Telemetry Sync')}
+                        >
+                          Trigger Info Toast
+                        </Button>
+                      </Inline>
+                    </div>
+
+                    {/* Stepper Primitive */}
+                    <div style={{ borderTop: '1px solid var(--kui-color-border)', paddingTop: 'var(--kui-space-3)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--kui-space-2)' }}>
+                        <span style={{ fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)' }}>
+                          Stepper Primitive (Multi-Step Workflow):
+                        </span>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={stepperStep <= 0}
+                            onClick={() => setStepperStep((s) => Math.max(0, s - 1))}
+                          >
+                            Prev Step
+                          </Button>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            disabled={stepperStep >= 2}
+                            onClick={() => setStepperStep((s) => Math.min(2, s + 1))}
+                          >
+                            Next Step
+                          </Button>
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          padding: 'var(--kui-space-4)',
+                          backgroundColor: 'var(--kui-color-surface)',
+                          border: '1px solid var(--kui-color-border)',
+                          borderRadius: 'var(--kui-radius-md)',
+                        }}
+                      >
+                        <Stepper
+                          activeStep={stepperStep}
+                          onStepClick={setStepperStep}
+                          steps={[
+                            { id: 'step-1', title: 'Target Environment', description: 'Production or Staging VPC' },
+                            { id: 'step-2', title: 'Scopes & Quotas', description: 'Read/Write rate limits', optional: true },
+                            { id: 'step-3', title: 'Review & Mint', description: 'Cryptographic signature' },
+                          ]}
+                        />
+                      </div>
+                    </div>
+
+                    {/* MetricCards & Sparklines */}
+                    <div style={{ borderTop: '1px solid var(--kui-color-border)', paddingTop: 'var(--kui-space-3)' }}>
+                      <span style={{ fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)', display: 'block', marginBottom: 'var(--kui-space-2)' }}>
+                        MetricCard Primitives with Sparklines:
+                      </span>
+                      <Grid columns="repeat(auto-fit, minmax(240px, 1fr))" gap={3}>
+                        <MetricCard
+                          label="Active Credentials"
+                          value="1,429"
+                          delta="+12.4%"
+                          deltaType="increase"
+                          subtext="vs previous 30 days"
+                          icon={<KeyIcon size={16} />}
+                          sparkline={<Sparkline data={[14, 18, 16, 24, 30, 28, 42]} fill />}
+                        />
+                        <MetricCard
+                          label="P99 Gateway Latency"
+                          value="18.2ms"
+                          delta="-4.1ms"
+                          deltaType="decrease"
+                          deltaSentiment="positive"
+                          subtext="vs last week"
+                          icon={<ShieldIcon size={16} />}
+                          sparkline={<Sparkline data={[34, 30, 26, 25, 22, 20, 18]} color="var(--kui-color-accent)" fill />}
+                        />
+                        <MetricCard
+                          label="Ingress Error Rate"
+                          value="0.02%"
+                          delta="-0.05%"
+                          deltaType="decrease"
+                          deltaSentiment="positive"
+                          subtext="Within 99.98% SLA"
+                          icon={<LayersIcon size={16} />}
+                          sparkline={<Sparkline data={[8, 12, 10, 6, 4, 3, 2]} color="var(--kui-color-success)" fill />}
+                        />
+                      </Grid>
+                    </div>
+
+                    {/* Zero-Dependency Charts & Audit Timeline */}
+                    <div style={{ borderTop: '1px solid var(--kui-color-border)', paddingTop: 'var(--kui-space-3)' }}>
+                      <span style={{ fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)', display: 'block', marginBottom: 'var(--kui-space-2)' }}>
+                        Zero-Dependency SVG Micro-Charts & Audit Timeline:
+                      </span>
+                      <Grid columns="repeat(auto-fit, minmax(300px, 1fr))" gap={4}>
+                        <ChartContainer
+                          title="Daily Ingestion Volume"
+                          subtitle="Requests per hour (Thousands)"
+                          legend={
+                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                <span style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: 'var(--kui-color-brand-primary)' }} />
+                                Production VPC
+                              </span>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                <span style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: 'var(--kui-color-accent)' }} />
+                                Staging Mesh
+                              </span>
+                            </div>
+                          }
+                        >
+                          <BarChart
+                            data={[
+                              { label: 'Mon', value: 420 },
+                              { label: 'Tue', value: 680 },
+                              { label: 'Wed', value: 890 },
+                              { label: 'Thu', value: 810 },
+                              { label: 'Fri', value: 950 },
+                              { label: 'Sat', value: 540 },
+                              { label: 'Sun', value: 410 },
+                            ]}
+                            valueFormatter={(v) => `${v}k`}
+                          />
+                        </ChartContainer>
+
+                        <ChartContainer
+                          title="Credential Status Distribution"
+                          subtitle="Active vs Expiring vs Revoked"
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--kui-space-2) 0' }}>
+                            <DonutChart
+                              segments={[
+                                { label: 'Active', value: 72, color: 'var(--kui-color-brand-primary)' },
+                                { label: 'Expiring', value: 18, color: 'var(--kui-color-warning)' },
+                                { label: 'Revoked', value: 10, color: 'var(--kui-color-danger)' },
+                              ]}
+                              centerLabel="100"
+                              centerSubtext="Total Keys"
+                            />
+                          </div>
+                        </ChartContainer>
+
+                        <ChartContainer
+                          title="Recent Security Audit Trail"
+                          subtitle="Immutable ledger of credential mutations"
+                        >
+                          <Timeline
+                            dense
+                            items={[
+                              {
+                                id: 'ev-1',
+                                title: 'TLS Gateway mTLS Certificate Auto-Rotated',
+                                timestamp: '8 mins ago',
+                                status: 'success',
+                                description: 'Synced new Let\'s Encrypt leaf certificate across 6 cluster nodes.',
+                              },
+                              {
+                                id: 'ev-2',
+                                title: 'API Key Revocation Request',
+                                timestamp: '2 hours ago',
+                                status: 'warning',
+                                description: 'Key kui_dev_77fe...d0 revoked due to inactivity policy.',
+                                actor: { name: 'Kaleem Molani' },
+                              },
+                              {
+                                id: 'ev-3',
+                                title: 'HMAC Signature Mismatch Detected',
+                                timestamp: '5 hours ago',
+                                status: 'danger',
+                                description: 'Edge router dropped 14 invalid payload attempts from 198.51.100.4.',
+                              },
+                            ]}
+                          />
+                        </ChartContainer>
+                      </Grid>
+                    </div>
                   </Stack>
                 </div>
 
@@ -1221,7 +1440,9 @@ const PreviewContent: React.FC = () => {
 export default function App() {
   return (
     <ThemeProvider>
-      <PreviewContent />
+      <ToastProvider>
+        <PreviewContent />
+      </ToastProvider>
     </ThemeProvider>
   );
 }

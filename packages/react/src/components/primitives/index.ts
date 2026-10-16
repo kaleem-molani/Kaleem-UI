@@ -15,3 +15,4 @@ export * from './DropdownMenu.js';
 export * from './Tabs.js';
 export * from './Accordion.js';
 export * from './Pagination.js';
+export * from './Stepper.js';

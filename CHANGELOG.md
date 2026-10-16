@@ -8,6 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **`ToastProvider` & `useToast()` Notification System**:
+  - Global reactive toast dispatcher supporting stacked container positioning (`bottom-right`, `top-right`, `bottom-center`, etc.).
+  - Configurable auto-dismiss timers with pause-on-hover, manual dismissal, and callback hooks.
+  - Polite and assertive ARIA live-regions (`role="status"` / `role="alert"`) for screen reader announcements.
+  - Convenience dispatch helpers: `toast()`, `toast.success()`, `toast.danger()`, `toast.warning()`, and `toast.info()`.
+- **`MetricCard` Telemetry Primitive**:
+  - Executive KPI card designed for dashboard analytics.
+  - Supports prominent metric values, uppercase labels, sentiment-colored delta change badges (`ArrowUpIcon` / `ArrowDownIcon`), descriptive subtext, and an embedded sparkline or accessory slot.
+- **`Timeline` Audit Trail Primitive**:
+  - Chronological activity log rendered as semantic `<ol role="list">` and `<li>`.
+  - Continuous 2px vertical connective track with status-accented milestone markers (success, warning, danger, neutral, brand).
+  - Integrates actor avatars, timestamps, titles, descriptions, and tag pills.
+- **`Stepper` Workflow Primitive**:
+  - Multi-step wizard and progress navigation adhering to WAI-ARIA (`<nav aria-label="Progress">`, `aria-current="step"`).
+  - Supports numbered and checkmark step circles, horizontal and vertical orientations, completed/current/upcoming step states, and clickable step callbacks.
+- **Zero-Dependency SVG Micro-Charts (`@kaleem-ui/react`)**:
+  - `ChartContainer`: Accessible wrapper providing titles, subtitles, semantic legends, and `role="img"` attributes.
+  - `Sparkline`: Compact trend line with automatic coordinate normalization, mint gradient fill, and min/max anchor points.
+  - `BarChart`: Scaled categorical bars with customizable bar colors, value labels, and interactive tooltips.
+  - `DonutChart`: Proportional SVG circular segment visualization with center metric readout and accessible metadata.
 - **`Pagination` Primitive**: Accessible multi-page navigation component supporting page truncation dots (`getPaginationRange`), `aria-current="page"`, next/previous controls, customizable `pageSizeOptions`, and items range summary.
 - **`DataTable` Sorting & Pagination**:
   - Added `sortable?: boolean` to `DataTableColumn<T>` with interactive column header buttons, sort direction arrows (`ArrowUpIcon`, `ArrowDownIcon`, `ArrowUpDownIcon`), and accessible `aria-sort="ascending" | "descending" | "none"`.

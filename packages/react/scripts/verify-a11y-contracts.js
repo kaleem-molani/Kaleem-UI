@@ -14,9 +14,17 @@ import {
   Breadcrumbs,
   DataTable,
   Pagination,
+  Stepper,
+  MetricCard,
+  Timeline,
+  Toast,
+  ToastProvider,
+  ChartContainer,
+  Sparkline,
+  BarChart,
+  DonutChart,
   Spinner,
   InlineAlert,
-  Toast,
 } from '../dist/index.js';
 
 console.log('--- Running Accessibility & ARIA Contract Verification ---');
@@ -222,4 +230,91 @@ console.log('--- Running Accessibility & ARIA Contract Verification ---');
   console.log('[PASS] Pagination navigation and aria-current contracts');
 }
 
-console.log('✓ All 13 accessibility & ARIA contracts verified successfully.');
+// 14. ToastProvider contract (live region, container)
+{
+  const tHtml = renderToString(React.createElement(ToastProvider, null, React.createElement('div', null, 'App Content')));
+  assert(tHtml.includes('role="region"'), 'ToastProvider must render notification live region');
+  assert(tHtml.includes('aria-label="Notifications"'), 'ToastProvider must label notifications region');
+  assert(tHtml.includes('App Content'), 'ToastProvider must render child tree');
+  console.log('[PASS] ToastProvider live region and container contracts');
+}
+
+// 15. MetricCard contract
+{
+  const mHtml = renderToString(React.createElement(MetricCard, {
+    label: 'Ingestion Latency',
+    value: '42.4ms',
+    delta: '-12.8%',
+    deltaType: 'decrease',
+    deltaSentiment: 'positive',
+    subtext: 'vs previous 30 days',
+  }));
+  assert(mHtml.includes('Ingestion Latency'), 'MetricCard must display label');
+  assert(mHtml.includes('uppercase'), 'MetricCard must set uppercase style');
+  assert(mHtml.includes('42.4ms'), 'MetricCard must display main value');
+  assert(mHtml.includes('-12.8%'), 'MetricCard must display trend delta');
+  assert(mHtml.includes('vs previous 30 days'), 'MetricCard must display subtext');
+  console.log('[PASS] MetricCard telemetry and delta sentiment contracts');
+}
+
+// 16. Timeline contract
+{
+  const tmHtml = renderToString(React.createElement(Timeline, {
+    items: [
+      { id: 't1', title: 'TLS Cert Renewed', timestamp: '5m ago', status: 'success' },
+      { id: 't2', title: 'Key Revocation', timestamp: '1h ago', status: 'danger' },
+    ],
+  }));
+  assert(tmHtml.includes('<ol'), 'Timeline must use semantic ordered list');
+  assert(tmHtml.includes('<li'), 'Timeline must render list items');
+  assert(tmHtml.includes('TLS Cert Renewed'), 'Timeline must display event title');
+  assert(tmHtml.includes('5m ago'), 'Timeline must display timestamp');
+  console.log('[PASS] Timeline list semantics and event track contracts');
+}
+
+// 17. Stepper contract
+{
+  const stHtml = renderToString(React.createElement(Stepper, {
+    steps: [
+      { id: 's1', title: 'Identity' },
+      { id: 's2', title: 'Scopes', optional: true },
+      { id: 's3', title: 'Review' },
+    ],
+    activeStep: 1,
+  }));
+  assert(stHtml.includes('<nav'), 'Stepper must be wrapped in a <nav> landmark');
+  assert(stHtml.includes('aria-current="step"'), 'Active step must set aria-current="step"');
+  assert(stHtml.includes('(Optional)'), 'Optional step must display indicator');
+  console.log('[PASS] Stepper progress navigation and aria-current contracts');
+}
+
+// 18. Charts contract (ChartContainer, Sparkline, BarChart, DonutChart)
+{
+  const cHtml = renderToString(React.createElement(ChartContainer, {
+    title: 'Cluster Throughput',
+    subtitle: 'Megabits per second',
+    legend: React.createElement('div', null, 'Legend'),
+  }, React.createElement(Sparkline, { data: [10, 20, 15, 30, 25, 40] })));
+  assert(cHtml.includes('role="img"'), 'ChartContainer must set role="img"');
+  assert(cHtml.includes('aria-label="Cluster Throughput"'), 'ChartContainer must have accessible label');
+  assert(cHtml.includes('<svg'), 'Sparkline must render SVG element');
+
+  const dHtml = renderToString(React.createElement(DonutChart, {
+    segments: [
+      { label: 'Active', value: 80 },
+      { label: 'Idle', value: 20 },
+    ],
+    centerLabel: '100 Nodes',
+  }));
+  assert(dHtml.includes('100 Nodes'), 'DonutChart must display center metric readout');
+  assert(dHtml.includes('Active: 80'), 'DonutChart segment must render accessible title');
+
+  const bHtml = renderToString(React.createElement(BarChart, {
+    data: [{ label: 'Mon', value: 120 }, { label: 'Tue', value: 180 }],
+  }));
+  assert(bHtml.includes('Mon'), 'BarChart must render categorical labels');
+  assert(bHtml.includes('180'), 'BarChart must render bar value');
+  console.log('[PASS] Zero-dependency SVG Charts accessibility & rendering contracts');
+}
+
+console.log('✓ All 18 accessibility & ARIA contracts verified successfully.');
