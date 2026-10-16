@@ -19,6 +19,8 @@ export interface DataTableColumn<T> {
   sortable?: boolean;
 }
 
+export type DataTableHeightMode = 'auto' | 'fill' | 'fixed';
+
 export interface DataTableProps<T> {
   columns: DataTableColumn<T>[];
   data: T[];
@@ -33,6 +35,33 @@ export interface DataTableProps<T> {
   sortConfig?: SortConfig;
   onSortChange?: (sortConfig: SortConfig) => void;
   pagination?: React.ReactNode;
+  /**
+   * Sizing strategy for the table's vertical height:
+   * - 'auto' (default): Collapses and adjusts height dynamically to fit the number of rows.
+   * - 'fill': Stretches to fill 100% of the parent container or viewport space. If only a few rows exist, the empty space is preserved inside the table below the last row, and pagination stays docked at the bottom.
+   * - 'fixed': Enforces a fixed height container with sticky header and internal scrolling.
+   */
+  heightMode?: DataTableHeightMode;
+  /**
+   * Convenience boolean flag: when true, activates 'fill' heightMode.
+   */
+  fullHeight?: boolean;
+  /**
+   * Explicit height CSS value (e.g., '400px', '70vh', 'calc(100vh - 240px)', '100%').
+   */
+  height?: string | number;
+  /**
+   * Minimum height constraint for the table container (defaults to '320px' in 'fill' mode).
+   */
+  minHeight?: string | number;
+  /**
+   * Maximum height constraint with internal vertical scrolling.
+   */
+  maxHeight?: string | number;
+  /**
+   * Custom style overrides for the outer table container card.
+   */
+  style?: React.CSSProperties;
 }
 
 export function DataTable<T>({
@@ -49,7 +78,31 @@ export function DataTable<T>({
   sortConfig,
   onSortChange,
   pagination,
+  heightMode = 'auto',
+  fullHeight = false,
+  height,
+  minHeight,
+  maxHeight,
+  style,
 }: DataTableProps<T>): React.ReactElement {
+  const effectiveHeightMode: DataTableHeightMode = fullHeight
+    ? 'fill'
+    : height && heightMode === 'auto'
+      ? 'fixed'
+      : heightMode;
+
+  const isFill = effectiveHeightMode === 'fill';
+  const isFixed = effectiveHeightMode === 'fixed';
+  const isExpanded = isFill || isFixed;
+
+  const containerHeight = isFill
+    ? (height ?? '100%')
+    : isFixed
+      ? (height ?? '500px')
+      : height;
+
+  const containerMinHeight = minHeight ?? (isFill ? '320px' : undefined);
+
   const allSelected = data.length > 0 && selectedKeys.length === data.length;
   const someSelected = selectedKeys.length > 0 && selectedKeys.length < data.length;
 
@@ -92,31 +145,55 @@ export function DataTable<T>({
 
   return (
     <div
+      data-height-mode={effectiveHeightMode}
       style={{
         width: '100%',
-        overflowX: 'auto',
+        height: containerHeight,
+        minHeight: containerMinHeight,
+        maxHeight: maxHeight,
+        display: isExpanded ? 'flex' : 'block',
+        flexDirection: isExpanded ? 'column' : undefined,
         border: '1px solid var(--kui-color-border)',
         borderRadius: 'var(--kui-radius-md)',
         backgroundColor: 'var(--kui-color-surface)',
+        overflow: 'hidden',
+        boxSizing: 'border-box',
+        ...style,
       }}
     >
-      <table
-        aria-label={ariaLabel}
+      <div
         style={{
           width: '100%',
-          borderCollapse: 'collapse',
-          fontSize: 'var(--kui-font-size-sm)',
-          fontFamily: 'var(--kui-font-sans)',
-          textAlign: 'left',
+          overflowX: 'auto',
+          overflowY: isExpanded ? 'auto' : undefined,
+          flex: isExpanded ? '1 1 auto' : undefined,
+          minHeight: 0,
         }}
       >
-        <thead>
-          <tr
+        <table
+          aria-label={ariaLabel}
+          style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            fontSize: 'var(--kui-font-size-sm)',
+            fontFamily: 'var(--kui-font-sans)',
+            textAlign: 'left',
+          }}
+        >
+          <thead
             style={{
-              borderBottom: '1px solid var(--kui-color-border)',
+              position: isExpanded ? 'sticky' : undefined,
+              top: 0,
+              zIndex: 2,
               backgroundColor: 'var(--kui-color-surface-subtle)',
             }}
           >
+            <tr
+              style={{
+                borderBottom: '1px solid var(--kui-color-border)',
+                backgroundColor: 'var(--kui-color-surface-subtle)',
+              }}
+            >
             {selectable && (
               <th style={{ width: '44px', padding: '10px 12px', textAlign: 'center' }}>
                 <Checkbox
@@ -286,12 +363,15 @@ export function DataTable<T>({
           )}
         </tbody>
       </table>
+      </div>
       {pagination && (
         <div
           style={{
             borderTop: '1px solid var(--kui-color-border)',
             padding: '12px 16px',
             backgroundColor: 'var(--kui-color-surface-subtle)',
+            flexShrink: 0,
+            marginTop: isExpanded ? 'auto' : undefined,
           }}
         >
           {pagination}

@@ -192,7 +192,25 @@ console.log('--- Running Accessibility & ARIA Contract Verification ---');
   assert(html.includes('aria-sort="ascending"'), 'Sorted column must set aria-sort="ascending"');
   assert(html.includes('Sort by Node Name'), 'Sortable column header must have descriptive aria-label');
   assert(html.includes('id="table-pagination-test"'), 'DataTable must render pagination container when passed');
-  console.log('[PASS] DataTable semantic structure, sorting, and pagination contracts');
+  assert(html.includes('data-height-mode="auto"'), 'DataTable default must have data-height-mode="auto"');
+
+  const fillHtml = renderToString(React.createElement(DataTable, {
+    data: [{ id: '1', name: 'Gateway 1', status: 'Active' }],
+    keyExtractor: (item) => item.id,
+    heightMode: 'fill',
+    columns: [{ key: 'name', header: 'Node Name' }],
+  }));
+  assert(fillHtml.includes('data-height-mode="fill"'), 'DataTable fill mode must set data-height-mode="fill"');
+  assert(fillHtml.includes('sticky'), 'DataTable fill mode must render sticky header');
+
+  const fullHeightHtml = renderToString(React.createElement(DataTable, {
+    data: [{ id: '1', name: 'Gateway 1', status: 'Active' }],
+    keyExtractor: (item) => item.id,
+    fullHeight: true,
+    columns: [{ key: 'name', header: 'Node Name' }],
+  }));
+  assert(fullHeightHtml.includes('data-height-mode="fill"'), 'DataTable fullHeight prop must activate fill mode');
+  console.log('[PASS] DataTable semantic structure, sorting, pagination, and heightMode contracts');
 }
 
 // 12. Spinner & Feedback contracts

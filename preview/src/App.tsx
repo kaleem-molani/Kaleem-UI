@@ -36,6 +36,7 @@ import {
   FilterBar,
   SearchField,
   DataTable,
+  type DataTableHeightMode,
   paginateAndSortData,
   type SortConfig,
   Pagination,
@@ -106,6 +107,7 @@ const PreviewContent: React.FC = () => {
   const [tableSort, setTableSort] = useState<SortConfig>({ key: 'name', direction: 'asc' });
   const [tablePage, setTablePage] = useState(1);
   const [tablePageSize, setTablePageSize] = useState(2);
+  const [tableHeightMode, setTableHeightMode] = useState<DataTableHeightMode>('fixed');
   const [stepperStep, setStepperStep] = useState(1);
   const toast = useToast();
 
@@ -1049,9 +1051,53 @@ const PreviewContent: React.FC = () => {
 
                     {/* Generic DataTable Pattern with Sorting & Integrated Pagination */}
                     <div style={{ borderTop: '1px solid var(--kui-color-border)', paddingTop: 'var(--kui-space-3)' }}>
-                      <span style={{ fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)', display: 'block', marginBottom: 'var(--kui-space-2)' }}>
-                        Reusable DataTable (Sortable Columns, Row Selection & Integrated Pagination):
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--kui-space-2)', flexWrap: 'wrap', gap: '8px' }}>
+                        <span style={{ fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)' }}>
+                          Reusable DataTable (Sortable Columns, Row Selection & Height Mode):
+                        </span>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: 'var(--kui-font-size-xs)' }}>
+                          <span style={{ color: 'var(--kui-color-text-secondary)', fontSize: '11px' }}>Height Mode:</span>
+                          <div style={{ display: 'inline-flex', backgroundColor: 'var(--kui-color-surface-subtle)', borderRadius: 'var(--kui-radius-sm)', padding: '2px', border: '1px solid var(--kui-color-border)' }}>
+                            <button
+                              type="button"
+                              onClick={() => setTableHeightMode('auto')}
+                              style={{
+                                padding: '2px 8px',
+                                fontSize: '11px',
+                                fontWeight: tableHeightMode === 'auto' ? 'var(--kui-font-weight-semibold)' : 'normal',
+                                backgroundColor: tableHeightMode === 'auto' ? 'var(--kui-color-surface)' : 'transparent',
+                                color: tableHeightMode === 'auto' ? 'var(--kui-color-brand-primary)' : 'var(--kui-color-text-secondary)',
+                                border: 'none',
+                                borderRadius: 'var(--kui-radius-sm)',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              Auto (Collapses to Rows)
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setTableHeightMode('fixed')}
+                              style={{
+                                padding: '2px 8px',
+                                fontSize: '11px',
+                                fontWeight: tableHeightMode !== 'auto' ? 'var(--kui-font-weight-semibold)' : 'normal',
+                                backgroundColor: tableHeightMode !== 'auto' ? 'var(--kui-color-surface)' : 'transparent',
+                                color: tableHeightMode !== 'auto' ? 'var(--kui-color-brand-primary)' : 'var(--kui-color-text-secondary)',
+                                border: 'none',
+                                borderRadius: 'var(--kui-radius-sm)',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              Fill/Fixed (Empty Inside When Few Rows)
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <p style={{ margin: '0 0 var(--kui-space-3) 0', fontSize: '11px', color: 'var(--kui-color-text-secondary)' }}>
+                        {tableHeightMode === 'auto'
+                          ? 'Table height collapses dynamically to fit row count (try changing page size to 2, 4, or 6).'
+                          : 'Table maintains fixed container bounds covering screen space; when only 1 or 2 rows exist, the interior below the last row remains empty while pagination stays anchored at bottom.'}
+                      </p>
                       {(() => {
                         const rawData = [
                           { id: 'k1', name: 'Ingress Proxy Token', env: 'Production', status: 'Active' },
@@ -1080,6 +1126,8 @@ const PreviewContent: React.FC = () => {
                               setTableSort(newSort);
                               setTablePage(1);
                             }}
+                            heightMode={tableHeightMode}
+                            height={tableHeightMode !== 'auto' ? '360px' : undefined}
                             columns={[
                               { key: 'name', header: 'Key Name', sortable: true },
                               { key: 'env', header: 'Environment', width: '150px', sortable: true },

@@ -29,7 +29,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `BarChart`: Scaled categorical bars with customizable bar colors, value labels, and interactive tooltips.
   - `DonutChart`: Proportional SVG circular segment visualization with center metric readout and accessible metadata.
 - **`Pagination` Primitive**: Accessible multi-page navigation component supporting page truncation dots (`getPaginationRange`), `aria-current="page"`, next/previous controls, customizable `pageSizeOptions`, and items range summary.
-- **`DataTable` Sorting & Pagination**:
+- **`DataTable` Sorting, Pagination & Height Modes**:
+  - Added `heightMode?: 'auto' | 'fill' | 'fixed'` and `fullHeight?: boolean` sizing strategy flags:
+    - `'auto'` (default): Container collapses dynamically to fit the row count.
+    - `'fill'` / `'fixed'`: Container occupies full screen/allocated card height (customizable via `height`, `minHeight`, `maxHeight`).
+    - When few rows are present (e.g. 1 or 2 rows), rows maintain standard compact height at the top, leaving clean empty surface area inside the table card rather than awkward blank gaps on the screen outside the table.
+    - Features sticky column header (`position: sticky`, `top: 0`, `zIndex: 2`) and anchored pagination footer pinned at the bottom.
   - Added `sortable?: boolean` to `DataTableColumn<T>` with interactive column header buttons, sort direction arrows (`ArrowUpIcon`, `ArrowDownIcon`, `ArrowUpDownIcon`), and accessible `aria-sort="ascending" | "descending" | "none"`.
   - Added optional integrated `pagination` container slot at table footer.
   - Exported `paginateAndSortData` client-side sorting and slicing helper function.
