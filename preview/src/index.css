@@ -1,0 +1,120 @@
+@import '@kaleem-ui/tokens/themes.css';
+
+/* Kaleem UI --- Global Reset & Foundation */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--kui-font-sans);
+  font-size: var(--kui-font-size-sm);
+  line-height: var(--kui-line-height-normal);
+  color: var(--kui-color-text-primary);
+  background-color: var(--kui-color-canvas);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Typography elements */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--kui-color-text-primary);
+  font-weight: var(--kui-font-weight-semibold);
+  line-height: var(--kui-line-height-heading);
+}
+
+h1 {
+  font-size: var(--kui-font-size-2xl);
+  letter-spacing: var(--kui-letter-spacing-tight);
+}
+
+h2 {
+  font-size: var(--kui-font-size-xl);
+  letter-spacing: var(--kui-letter-spacing-tight);
+}
+
+h3 {
+  font-size: var(--kui-font-size-lg);
+}
+
+p {
+  color: var(--kui-color-text-secondary);
+}
+
+a {
+  color: var(--kui-color-brand);
+  text-decoration: none;
+  font-weight: var(--kui-font-weight-medium);
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+code, kbd, samp, pre {
+  font-family: var(--kui-font-mono);
+  font-size: var(--kui-font-size-xs);
+}
+
+/* Accessible focus visible ring */
+:focus-visible {
+  outline: 2px solid var(--kui-color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Clean form resets */
+input, select, textarea, button {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Table resets */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* Button interactive states */
+.kui-btn-primary:not(:disabled):hover {
+  background-color: var(--kui-color-brand-hover) !important;
+}
+.kui-btn-secondary:not(:disabled):hover {
+  background-color: var(--kui-color-surface) !important;
+  border-color: var(--kui-color-border-strong) !important;
+}
+.kui-btn-outline:not(:disabled):hover {
+  background-color: var(--kui-color-surface-subtle) !important;
+}
+.kui-btn-ghost:not(:disabled):hover {
+  background-color: var(--kui-color-surface-subtle) !important;
+}
+.kui-btn-danger:not(:disabled):hover {
+  filter: brightness(0.9);
+}
+.kui-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+

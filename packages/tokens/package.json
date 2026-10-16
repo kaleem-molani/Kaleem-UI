@@ -1,0 +1,29 @@
+{
+  "name": "@kaleem-ui/tokens",
+  "version": "1.0.0",
+  "description": "Design tokens and semantic CSS properties for Kaleem UI",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./themes.css": "./src/themes.css",
+    "./tokens.json": "./src/tokens.json"
+  },
+  "files": [
+    "dist",
+    "src/themes.css",
+    "src/tokens.json"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "test": "node scripts/verify-contrast.js",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.2"
+  }
+}
