@@ -52,6 +52,16 @@ import {
   Sparkline,
   BarChart,
   DonutChart,
+  AreaChart,
+  Heatmap,
+  GaugeChart,
+  MetricBreakdownList,
+  FunnelChart,
+  RadarChart,
+  ScatterPlot,
+  StackedBarChart,
+  Treemap,
+  UptimeTracker,
 } from '@kaleem-ui/react';
 import {
   DataTablePattern,
@@ -77,10 +87,13 @@ import {
   TrashIcon,
   ExternalLinkIcon,
   SlidersIcon,
+  BarChartIcon,
+  ActivityIcon,
+  RefreshIcon,
 } from './components/common/Icons';
 import './App.css';
 
-type NavSection = 'credentials' | 'foundations' | 'components' | 'patterns' | 'guidelines';
+type NavSection = 'credentials' | 'foundations' | 'components' | 'patterns' | 'guidelines' | 'analytics';
 type TableViewState = 'populated' | 'empty' | 'loading' | 'error';
 type ViewportMode = 'desktop' | 'mobile';
 
@@ -109,6 +122,7 @@ const PreviewContent: React.FC = () => {
   const [tablePageSize, setTablePageSize] = useState(2);
   const [tableHeightMode, setTableHeightMode] = useState<DataTableHeightMode>('fixed');
   const [stepperStep, setStepperStep] = useState(1);
+  const [analyticsRange, setAnalyticsRange] = useState<'24h' | '7d' | '30d' | 'quarter'>('7d');
   const toast = useToast();
 
   // Escape key handler for dialog and mobile drawer
@@ -145,6 +159,8 @@ const PreviewContent: React.FC = () => {
         return 'Component Primitives';
       case 'patterns':
         return 'Application Patterns';
+      case 'analytics':
+        return 'Analytics & Telemetry';
       case 'guidelines':
         return 'Guidelines & WCAG Standards';
     }
@@ -160,6 +176,8 @@ const PreviewContent: React.FC = () => {
         return 'Atomic interactive building blocks using canonical evergreen-mint semantic variables.';
       case 'patterns':
         return 'High-order application patterns built entirely with Kaleem UI primitives: headers, forms, tables, filters, and overlays.';
+      case 'analytics':
+        return 'Telemetry cards, zero-dependency SVG micro-charts, sparklines, and immutable timeline feeds.';
       case 'guidelines':
         return 'Component authoring Do/Don\'t matrix, accessibility notes, and live token contrast verification.';
     }
@@ -270,6 +288,18 @@ const PreviewContent: React.FC = () => {
           >
             <CheckIcon size={16} />
             <span>Guidelines & Quality</span>
+          </button>
+
+          <button
+            type="button"
+            className={`kui-nav-link ${activeSection === 'analytics' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveSection('analytics');
+              setMobileNavOpen(false);
+            }}
+          >
+            <BarChartIcon size={16} />
+            <span>Analytics</span>
           </button>
         </nav>
 
@@ -1308,132 +1338,6 @@ const PreviewContent: React.FC = () => {
                         />
                       </div>
                     </div>
-
-                    {/* MetricCards & Sparklines */}
-                    <div style={{ borderTop: '1px solid var(--kui-color-border)', paddingTop: 'var(--kui-space-3)' }}>
-                      <span style={{ fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)', display: 'block', marginBottom: 'var(--kui-space-2)' }}>
-                        MetricCard Primitives with Sparklines:
-                      </span>
-                      <Grid columns="repeat(auto-fit, minmax(240px, 1fr))" gap={3}>
-                        <MetricCard
-                          label="Active Credentials"
-                          value="1,429"
-                          delta="+12.4%"
-                          deltaType="increase"
-                          subtext="vs previous 30 days"
-                          icon={<KeyIcon size={16} />}
-                          sparkline={<Sparkline data={[14, 18, 16, 24, 30, 28, 42]} fill />}
-                        />
-                        <MetricCard
-                          label="P99 Gateway Latency"
-                          value="18.2ms"
-                          delta="-4.1ms"
-                          deltaType="decrease"
-                          deltaSentiment="positive"
-                          subtext="vs last week"
-                          icon={<ShieldIcon size={16} />}
-                          sparkline={<Sparkline data={[34, 30, 26, 25, 22, 20, 18]} color="var(--kui-color-accent)" fill />}
-                        />
-                        <MetricCard
-                          label="Ingress Error Rate"
-                          value="0.02%"
-                          delta="-0.05%"
-                          deltaType="decrease"
-                          deltaSentiment="positive"
-                          subtext="Within 99.98% SLA"
-                          icon={<LayersIcon size={16} />}
-                          sparkline={<Sparkline data={[8, 12, 10, 6, 4, 3, 2]} color="var(--kui-color-success)" fill />}
-                        />
-                      </Grid>
-                    </div>
-
-                    {/* Zero-Dependency Charts & Audit Timeline */}
-                    <div style={{ borderTop: '1px solid var(--kui-color-border)', paddingTop: 'var(--kui-space-3)' }}>
-                      <span style={{ fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)', display: 'block', marginBottom: 'var(--kui-space-2)' }}>
-                        Zero-Dependency SVG Micro-Charts & Audit Timeline:
-                      </span>
-                      <Grid columns="repeat(auto-fit, minmax(300px, 1fr))" gap={4}>
-                        <ChartContainer
-                          title="Daily Ingestion Volume"
-                          subtitle="Requests per hour (Thousands)"
-                          legend={
-                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                                <span style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: 'var(--kui-color-brand-primary)' }} />
-                                Production VPC
-                              </span>
-                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                                <span style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: 'var(--kui-color-accent)' }} />
-                                Staging Mesh
-                              </span>
-                            </div>
-                          }
-                        >
-                          <BarChart
-                            data={[
-                              { label: 'Mon', value: 420 },
-                              { label: 'Tue', value: 680 },
-                              { label: 'Wed', value: 890 },
-                              { label: 'Thu', value: 810 },
-                              { label: 'Fri', value: 950 },
-                              { label: 'Sat', value: 540 },
-                              { label: 'Sun', value: 410 },
-                            ]}
-                            valueFormatter={(v) => `${v}k`}
-                          />
-                        </ChartContainer>
-
-                        <ChartContainer
-                          title="Credential Status Distribution"
-                          subtitle="Active vs Expiring vs Revoked"
-                        >
-                          <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--kui-space-2) 0' }}>
-                            <DonutChart
-                              segments={[
-                                { label: 'Active', value: 72, color: 'var(--kui-color-brand-primary)' },
-                                { label: 'Expiring', value: 18, color: 'var(--kui-color-warning)' },
-                                { label: 'Revoked', value: 10, color: 'var(--kui-color-danger)' },
-                              ]}
-                              centerLabel="100"
-                              centerSubtext="Total Keys"
-                            />
-                          </div>
-                        </ChartContainer>
-
-                        <ChartContainer
-                          title="Recent Security Audit Trail"
-                          subtitle="Immutable ledger of credential mutations"
-                        >
-                          <Timeline
-                            dense
-                            items={[
-                              {
-                                id: 'ev-1',
-                                title: 'TLS Gateway mTLS Certificate Auto-Rotated',
-                                timestamp: '8 mins ago',
-                                status: 'success',
-                                description: 'Synced new Let\'s Encrypt leaf certificate across 6 cluster nodes.',
-                              },
-                              {
-                                id: 'ev-2',
-                                title: 'API Key Revocation Request',
-                                timestamp: '2 hours ago',
-                                status: 'warning',
-                                description: 'Key kui_dev_77fe...d0 revoked due to inactivity policy.',
-                                actor: { name: 'Kaleem Molani' },
-                              },
-                              {
-                                id: 'ev-3',
-                                title: 'HMAC Signature Mismatch Detected',
-                                timestamp: '5 hours ago',
-                                status: 'danger',
-                                description: 'Edge router dropped 14 invalid payload attempts from 198.51.100.4.',
-                              },
-                            ]}
-                          />
-                        </ChartContainer>
-                      </Grid>
-                    </div>
                   </Stack>
                 </div>
 
@@ -1460,6 +1364,707 @@ const PreviewContent: React.FC = () => {
             {/* TAB 5: GUIDELINES & WCAG QUALITY AUDIT */}
             {activeSection === 'guidelines' && (
               <GuidelinesPattern />
+            )}
+
+            {/* TAB 6: ANALYTICS & TELEMETRY */}
+            {activeSection === 'analytics' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--kui-space-5)' }}>
+                {/* Analytics Control Bar */}
+                <div
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 'var(--kui-space-3)',
+                    backgroundColor: 'var(--kui-color-surface)',
+                    border: '1px solid var(--kui-color-border)',
+                    borderRadius: 'var(--kui-radius-lg)',
+                    padding: 'var(--kui-space-3) var(--kui-space-4)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--kui-space-2)' }}>
+                    <BarChartIcon size={18} style={{ color: 'var(--kui-color-brand-primary)' }} />
+                    <div>
+                      <span style={{ fontSize: 'var(--kui-font-size-sm)', fontWeight: 'var(--kui-font-weight-semibold)', color: 'var(--kui-color-text-primary)' }}>
+                        Cluster Telemetry & Performance
+                      </span>
+                      <span style={{ fontSize: 'var(--kui-font-size-xs)', color: 'var(--kui-color-text-secondary)', display: 'block' }}>
+                        Real-time gateway metrics, request distributions, and immutable security ledger
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--kui-space-3)', flexWrap: 'wrap' }}>
+                    <div
+                      style={{
+                        display: 'inline-flex',
+                        backgroundColor: 'var(--kui-color-surface-subtle)',
+                        borderRadius: 'var(--kui-radius-sm)',
+                        padding: '2px',
+                        border: '1px solid var(--kui-color-border)',
+                      }}
+                    >
+                      {(
+                        [
+                          { id: '24h', label: 'Last 24h' },
+                          { id: '7d', label: 'Last 7d' },
+                          { id: '30d', label: 'Last 30d' },
+                          { id: 'quarter', label: 'Quarter to Date' },
+                        ] as const
+                      ).map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => setAnalyticsRange(item.id)}
+                          style={{
+                            padding: '3px 10px',
+                            fontSize: '11px',
+                            fontWeight: analyticsRange === item.id ? 'var(--kui-font-weight-semibold)' : 'normal',
+                            backgroundColor: analyticsRange === item.id ? 'var(--kui-color-surface)' : 'transparent',
+                            color: analyticsRange === item.id ? 'var(--kui-color-brand-primary)' : 'var(--kui-color-text-secondary)',
+                            border: 'none',
+                            borderRadius: 'var(--kui-radius-sm)',
+                            cursor: 'pointer',
+                            boxShadow: analyticsRange === item.id ? 'var(--kui-shadow-sm)' : 'none',
+                            transition: 'all 120ms ease',
+                          }}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      leadingIcon={<RefreshIcon size={13} />}
+                      onClick={() => toast.info('Telemetry data synced with edge cluster nodes.', 'Data Refreshed')}
+                    >
+                      Sync Telemetry
+                    </Button>
+                  </div>
+                </div>
+
+                {/* 1. Executive Telemetry Metrics Grid */}
+                <div className="kui-showcase-section">
+                  <div>
+                    <h2 style={{ fontSize: 'var(--kui-font-size-md)', margin: 0 }}>Executive KPI Metrics (`MetricCard`)</h2>
+                    <p style={{ fontSize: 'var(--kui-font-size-xs)', margin: 0 }}>
+                      High-impact summary telemetry cards with trend badges, comparative subtext, and embedded responsive sparklines.
+                    </p>
+                  </div>
+
+                  <Grid columns="repeat(auto-fit, minmax(240px, 1fr))" gap={3}>
+                    <MetricCard
+                      label="Active Credentials"
+                      value={analyticsRange === '24h' ? '312' : analyticsRange === '7d' ? '1,429' : analyticsRange === '30d' ? '5,820' : '14,290'}
+                      delta="+12.4%"
+                      deltaType="increase"
+                      subtext={analyticsRange === '24h' ? 'vs yesterday' : 'vs previous period'}
+                      icon={<KeyIcon size={16} />}
+                      sparkline={<Sparkline data={analyticsRange === '24h' ? [12, 14, 15, 18, 20, 24, 28] : [14, 18, 16, 24, 30, 28, 42]} fill />}
+                    />
+                    <MetricCard
+                      label="P99 Gateway Latency"
+                      value={analyticsRange === '24h' ? '16.4ms' : analyticsRange === '7d' ? '18.2ms' : analyticsRange === '30d' ? '21.0ms' : '19.5ms'}
+                      delta="-4.1ms"
+                      deltaType="decrease"
+                      deltaSentiment="positive"
+                      subtext="Under 25ms SLO ceiling"
+                      icon={<ActivityIcon size={16} />}
+                      sparkline={<Sparkline data={[34, 30, 26, 25, 22, 20, 18]} color="var(--kui-color-accent)" fill />}
+                    />
+                    <MetricCard
+                      label="Ingress Error Rate"
+                      value="0.02%"
+                      delta="-0.05%"
+                      deltaType="decrease"
+                      deltaSentiment="positive"
+                      subtext="99.98% availability uptime"
+                      icon={<LayersIcon size={16} />}
+                      sparkline={<Sparkline data={[8, 12, 10, 6, 4, 3, 2]} color="var(--kui-color-success)" fill />}
+                    />
+                    <MetricCard
+                      label="Ingestion Throughput"
+                      value={analyticsRange === '24h' ? '680k' : analyticsRange === '7d' ? '4.69M' : analyticsRange === '30d' ? '18.4M' : '52.8M'}
+                      delta="+18.7%"
+                      deltaType="increase"
+                      deltaSentiment="positive"
+                      subtext="Peak 24.2k req/sec"
+                      icon={<BarChartIcon size={16} />}
+                      sparkline={<Sparkline data={[20, 28, 35, 42, 48, 55, 64]} color="var(--kui-color-brand-primary)" fill />}
+                    />
+                  </Grid>
+                </div>
+
+                {/* 2. SLO & Health Gauges */}
+                <div className="kui-showcase-section">
+                  <div>
+                    <h2 style={{ fontSize: 'var(--kui-font-size-md)', margin: 0 }}>SLO & Capacity Gauges (`GaugeChart`)</h2>
+                    <p style={{ fontSize: 'var(--kui-font-size-xs)', margin: 0 }}>
+                      Semi-circular radial meters for service level objectives, rate quota ceilings, and resource saturation.
+                    </p>
+                  </div>
+
+                  <Card variant="bordered">
+                    <Grid columns="repeat(auto-fit, minmax(220px, 1fr))" gap={4}>
+                      <GaugeChart
+                        value={99.98}
+                        min={95}
+                        max={100}
+                        label="SLO Availability"
+                        subtext="Target: >= 99.90%"
+                        valueFormatter={(v) => `${v}%`}
+                        color="var(--kui-color-brand-primary)"
+                      />
+                      <GaugeChart
+                        value={42}
+                        min={0}
+                        max={100}
+                        label="Rate Limit Quota"
+                        subtext="42k of 100k req/hr consumed"
+                        valueFormatter={(v) => `${v}%`}
+                        color="var(--kui-color-accent)"
+                      />
+                      <GaugeChart
+                        value={28}
+                        min={0}
+                        max={100}
+                        label="CPU Core Saturation"
+                        subtext="Cluster average across 24 pods"
+                        valueFormatter={(v) => `${v}%`}
+                        color="var(--kui-color-success)"
+                      />
+                    </Grid>
+                  </Card>
+                </div>
+
+                {/* 3. Time-Series Multi-Line AreaChart */}
+                <div className="kui-showcase-section">
+                  <div>
+                    <h2 style={{ fontSize: 'var(--kui-font-size-md)', margin: 0 }}>Time-Series Area Chart (`AreaChart`)</h2>
+                    <p style={{ fontSize: 'var(--kui-font-size-xs)', margin: 0 }}>
+                      Multi-series time-series visualization with gradient area fills, dashed gridlines, and coordinate interpolation.
+                    </p>
+                  </div>
+
+                  <ChartContainer
+                    title="Cluster Network Throughput (24 Hours)"
+                    subtitle="Ingress requests vs egress encrypted payloads (Thousands per hour)"
+                    legend={
+                      <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: 'var(--kui-color-text-secondary)' }}>
+                          <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: 'var(--kui-color-brand-primary)' }} />
+                          Ingress Traffic
+                        </span>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: 'var(--kui-color-text-secondary)' }}>
+                          <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: 'var(--kui-color-accent)' }} />
+                          Egress Payloads
+                        </span>
+                      </div>
+                    }
+                  >
+                    <AreaChart
+                      data={[
+                        { label: '00:00', ingress: 240, egress: 180 },
+                        { label: '04:00', ingress: 180, egress: 140 },
+                        { label: '08:00', ingress: 620, egress: 480 },
+                        { label: '12:00', ingress: 890, egress: 720 },
+                        { label: '16:00', ingress: 940, egress: 780 },
+                        { label: '20:00', ingress: 710, egress: 540 },
+                        { label: '24:00', ingress: 380, egress: 290 },
+                      ]}
+                      series={[
+                        { key: 'ingress', name: 'Ingress Traffic', color: 'var(--kui-color-brand-primary)', fill: true },
+                        { key: 'egress', name: 'Egress Payloads', color: 'var(--kui-color-accent)', fill: true },
+                      ]}
+                      height={220}
+                      valueFormatter={(v) => `${v}k`}
+                    />
+                  </ChartContainer>
+                </div>
+
+                {/* 4. 24x7 Traffic Intensity Matrix Heatmap */}
+                <div className="kui-showcase-section">
+                  <div>
+                    <h2 style={{ fontSize: 'var(--kui-font-size-md)', margin: 0 }}>Traffic Density Matrix (`Heatmap`)</h2>
+                    <p style={{ fontSize: 'var(--kui-font-size-xs)', margin: 0 }}>
+                      Weekly hourly request distribution matrix with mint-scaled heat levels and native accessible cell tooltips.
+                    </p>
+                  </div>
+
+                  <Card variant="bordered">
+                    <Heatmap
+                      data={[
+                        { x: '00:00', y: 'Mon', value: 12 }, { x: '03:00', y: 'Mon', value: 8 }, { x: '06:00', y: 'Mon', value: 34 }, { x: '09:00', y: 'Mon', value: 92 }, { x: '12:00', y: 'Mon', value: 85 }, { x: '15:00', y: 'Mon', value: 78 }, { x: '18:00', y: 'Mon', value: 65 }, { x: '21:00', y: 'Mon', value: 40 },
+                        { x: '00:00', y: 'Tue', value: 15 }, { x: '03:00', y: 'Tue', value: 9 }, { x: '06:00', y: 'Tue', value: 42 }, { x: '09:00', y: 'Tue', value: 110 }, { x: '12:00', y: 'Tue', value: 98 }, { x: '15:00', y: 'Tue', value: 88 }, { x: '18:00', y: 'Tue', value: 72 }, { x: '21:00', y: 'Tue', value: 45 },
+                        { x: '00:00', y: 'Wed', value: 18 }, { x: '03:00', y: 'Wed', value: 11 }, { x: '06:00', y: 'Wed', value: 45 }, { x: '09:00', y: 'Wed', value: 125 }, { x: '12:00', y: 'Wed', value: 104 }, { x: '15:00', y: 'Wed', value: 94 }, { x: '18:00', y: 'Wed', value: 80 }, { x: '21:00', y: 'Wed', value: 50 },
+                        { x: '00:00', y: 'Thu', value: 14 }, { x: '03:00', y: 'Thu', value: 10 }, { x: '06:00', y: 'Thu', value: 38 }, { x: '09:00', y: 'Thu', value: 105 }, { x: '12:00', y: 'Thu', value: 92 }, { x: '15:00', y: 'Thu', value: 86 }, { x: '18:00', y: 'Thu', value: 74 }, { x: '21:00', y: 'Thu', value: 42 },
+                        { x: '00:00', y: 'Fri', value: 16 }, { x: '03:00', y: 'Fri', value: 12 }, { x: '06:00', y: 'Fri', value: 40 }, { x: '09:00', y: 'Fri', value: 115 }, { x: '12:00', y: 'Fri', value: 118 }, { x: '15:00', y: 'Fri', value: 102 }, { x: '18:00', y: 'Fri', value: 85 }, { x: '21:00', y: 'Fri', value: 55 },
+                        { x: '00:00', y: 'Sat', value: 20 }, { x: '03:00', y: 'Sat', value: 15 }, { x: '06:00', y: 'Sat', value: 22 }, { x: '09:00', y: 'Sat', value: 48 }, { x: '12:00', y: 'Sat', value: 60 }, { x: '15:00', y: 'Sat', value: 55 }, { x: '18:00', y: 'Sat', value: 45 }, { x: '21:00', y: 'Sat', value: 35 },
+                        { x: '00:00', y: 'Sun', value: 14 }, { x: '03:00', y: 'Sun', value: 10 }, { x: '06:00', y: 'Sun', value: 18 }, { x: '09:00', y: 'Sun', value: 38 }, { x: '12:00', y: 'Sun', value: 52 }, { x: '15:00', y: 'Sun', value: 48 }, { x: '18:00', y: 'Sun', value: 38 }, { x: '21:00', y: 'Sun', value: 28 },
+                      ]}
+                      xLabels={['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00']}
+                      yLabels={['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']}
+                      cellSize={22}
+                    />
+                  </Card>
+                </div>
+
+                {/* Service Availability & 60-Day SLA Track */}
+                <div className="kui-showcase-section">
+                  <div>
+                    <h2 style={{ fontSize: 'var(--kui-font-size-md)', margin: 0 }}>Service Reliability & 60-Day SLA (`UptimeTracker`)</h2>
+                    <p style={{ fontSize: 'var(--kui-font-size-xs)', margin: 0 }}>
+                      High-density availability tracker with interactive daily status ribbons, incident popovers, and uptime percentages.
+                    </p>
+                  </div>
+
+                  <Card variant="bordered">
+                    <UptimeTracker
+                      daysCount={60}
+                      services={[
+                        {
+                          id: 'api-gateway',
+                          name: 'Edge API Gateway (Envoy Mesh)',
+                          currentStatus: 'operational',
+                          uptimePercentage: 99.99,
+                          latencyMs: 14,
+                          history: Array.from({ length: 60 }, (_, i) => ({
+                            date: `2026-09-${String((i % 30) + 1).padStart(2, '0')}`,
+                            status: i === 48 ? 'degraded' : 'operational',
+                            uptimePct: i === 48 ? 99.1 : 100,
+                            latencyMs: i === 48 ? 64 : 14,
+                            incident: i === 48 ? 'Transient upstream BGP routing failover' : undefined,
+                          })),
+                        },
+                        {
+                          id: 'vault-hsm',
+                          name: 'Cryptographic Key Vault & HSM',
+                          currentStatus: 'operational',
+                          uptimePercentage: 100.0,
+                          latencyMs: 8,
+                          history: Array.from({ length: 60 }, (_, i) => ({
+                            date: `2026-09-${String((i % 30) + 1).padStart(2, '0')}`,
+                            status: 'operational',
+                            uptimePct: 100,
+                            latencyMs: 8,
+                          })),
+                        },
+                        {
+                          id: 'event-broker',
+                          name: 'Webhook Event Dispatcher (Kafka Broker)',
+                          currentStatus: 'operational',
+                          uptimePercentage: 99.95,
+                          latencyMs: 38,
+                          history: Array.from({ length: 60 }, (_, i) => ({
+                            date: `2026-09-${String((i % 30) + 1).padStart(2, '0')}`,
+                            status: i === 18 ? 'degraded' : i === 52 ? 'degraded' : 'operational',
+                            uptimePct: i === 18 || i === 52 ? 98.8 : 100,
+                            latencyMs: i === 18 ? 112 : i === 52 ? 94 : 38,
+                            incident: i === 18 ? 'Buffer queue backpressure spike' : i === 52 ? 'Timeout retry flood' : undefined,
+                          })),
+                        },
+                      ]}
+                    />
+                  </Card>
+                </div>
+
+                {/* 5. Ranked Endpoints & Funnel Pipeline */}
+                <div className="kui-showcase-section">
+                  <div>
+                    <h2 style={{ fontSize: 'var(--kui-font-size-md)', margin: 0 }}>Endpoint Distribution & Auth Pipeline</h2>
+                    <p style={{ fontSize: 'var(--kui-font-size-xs)', margin: 0 }}>
+                      Ranked endpoint telemetry bars and multi-stage pipeline conversion tracking.
+                    </p>
+                  </div>
+
+                  <Grid columns="repeat(auto-fit, minmax(320px, 1fr))" gap={4}>
+                    <Card variant="bordered" header={<Text variant="label">Top API Endpoints by Ingestion Volume</Text>}>
+                      <MetricBreakdownList
+                        items={[
+                          { id: 'ep-1', label: '/v1/auth/tokens', value: 184200, secondaryValue: '38.2%', badge: <Badge size="sm" variant="success">Core</Badge> },
+                          { id: 'ep-2', label: '/v1/gateway/ingress', value: 128500, secondaryValue: '26.6%', badge: <Badge size="sm" variant="neutral">Proxy</Badge> },
+                          { id: 'ep-3', label: '/v1/audit/events', value: 92100, secondaryValue: '19.1%', badge: <Badge size="sm" variant="info">Audit</Badge> },
+                          { id: 'ep-4', label: '/v1/keys/rotate', value: 48000, secondaryValue: '10.0%', badge: <Badge size="sm" variant="warning">Crypto</Badge> },
+                          { id: 'ep-5', label: '/v1/webhooks/billing', value: 29400, secondaryValue: '6.1%', badge: <Badge size="sm" variant="neutral">Hooks</Badge> },
+                        ]}
+                        valueFormatter={(v) => `${(v / 1000).toFixed(1)}k reqs`}
+                      />
+                    </Card>
+
+                    <Card variant="bordered" header={<Text variant="label">Authentication & Security Pipeline (`FunnelChart`)</Text>}>
+                      <FunnelChart
+                        stages={[
+                          { id: 'f-1', name: 'Edge Ingress Handshake', count: 100000, description: 'Incoming TCP & TLS connections accepted' },
+                          { id: 'f-2', name: 'mTLS & Certificate Verification', count: 98400, description: 'Cryptographic client verification pass' },
+                          { id: 'f-3', name: 'Scope & Rate Quota Validation', count: 95200, description: 'Token active within quota ceilings' },
+                          { id: 'f-4', name: 'Payload Dispatched to Mesh', count: 94800, description: 'Forwarded to upstream cluster pods' },
+                        ]}
+                        valueFormatter={(v) => `${(v / 1000).toFixed(1)}k`}
+                      />
+                    </Card>
+                  </Grid>
+                </div>
+
+                {/* Multivariate Capability Scorecard & Hierarchical Space Partitioning */}
+                <div className="kui-showcase-section">
+                  <div>
+                    <h2 style={{ fontSize: 'var(--kui-font-size-md)', margin: 0 }}>Multivariate Scorecard (`RadarChart`) & Space Allocation (`Treemap`)</h2>
+                    <p style={{ fontSize: 'var(--kui-font-size-xs)', margin: 0 }}>
+                      Multi-axis operational comparison radar and proportional rectangular resource partitioning.
+                    </p>
+                  </div>
+
+                  <Grid columns="repeat(auto-fit, minmax(340px, 1fr))" gap={4}>
+                    <Card
+                      variant="bordered"
+                      header={<Text variant="label">Cluster Operational Posture (`RadarChart`)</Text>}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--kui-space-2) 0' }}>
+                        <RadarChart
+                          metrics={[
+                            { key: 'latency', label: 'Latency SLO' },
+                            { key: 'throughput', label: 'Throughput' },
+                            { key: 'reliability', label: 'Reliability' },
+                            { key: 'security', label: 'Security' },
+                            { key: 'scalability', label: 'Elastic Scale' },
+                            { key: 'efficiency', label: 'Cost Efficiency' },
+                          ]}
+                          series={[
+                            {
+                              id: 'prod',
+                              name: 'Production VPC',
+                              color: 'var(--kui-color-brand-primary)',
+                              data: {
+                                latency: 95,
+                                throughput: 92,
+                                reliability: 99,
+                                security: 98,
+                                scalability: 88,
+                                efficiency: 84,
+                              },
+                            },
+                            {
+                              id: 'staging',
+                              name: 'Staging Cluster',
+                              color: 'var(--kui-color-brand-accent)',
+                              data: {
+                                latency: 80,
+                                throughput: 68,
+                                reliability: 94,
+                                security: 90,
+                                scalability: 75,
+                                efficiency: 95,
+                              },
+                            },
+                          ]}
+                          size={300}
+                          valueFormatter={(val) => `${val}%`}
+                        />
+                      </div>
+                    </Card>
+
+                    <Card
+                      variant="bordered"
+                      header={<Text variant="label">Encrypted Data & Cache Footprint (`Treemap`)</Text>}
+                    >
+                      <Treemap
+                        data={[
+                          { id: 's3', label: 'Encrypted S3 Blobs', value: 450, color: '#0F4C3A' },
+                          { id: 'pg', label: 'Postgres Primary DB', value: 280, color: '#165E49' },
+                          { id: 'redis', label: 'Redis Session Cache', value: 140, color: '#248B6C' },
+                          { id: 'es', label: 'Audit Index (OpenSearch)', value: 120, color: '#2DD4BF' },
+                          { id: 'registry', label: 'OCI Container Registry', value: 70, color: '#14B8A6' },
+                          { id: 'archive', label: 'Cold Glacier Archive', value: 40, color: '#042F24' },
+                        ]}
+                        height={260}
+                        valueFormatter={(val) => `${val} GB`}
+                      />
+                    </Card>
+                  </Grid>
+                </div>
+
+                {/* 6. Zero-Dependency SVG Micro-Charts */}
+                <div className="kui-showcase-section">
+                  <div>
+                    <h2 style={{ fontSize: 'var(--kui-font-size-md)', margin: 0 }}>Categorical & Segment Visualizations (`BarChart` & `DonutChart`)</h2>
+                    <p style={{ fontSize: 'var(--kui-font-size-xs)', margin: 0 }}>
+                      Zero-dependency SVG micro-charts embedded within accessible `ChartContainer` primitives (`role="img"`).
+                    </p>
+                  </div>
+
+                  <Grid columns="repeat(auto-fit, minmax(320px, 1fr))" gap={4}>
+                    <ChartContainer
+                      title="Daily Ingestion Volume"
+                      subtitle="Requests per hour across cluster gateways (Thousands)"
+                      legend={
+                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: 'var(--kui-color-brand-primary)' }} />
+                            Production VPC
+                          </span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: 'var(--kui-color-accent)' }} />
+                            Staging Mesh
+                          </span>
+                        </div>
+                      }
+                    >
+                      <BarChart
+                        data={[
+                          { label: 'Mon', value: 420 },
+                          { label: 'Tue', value: 680 },
+                          { label: 'Wed', value: 890 },
+                          { label: 'Thu', value: 810 },
+                          { label: 'Fri', value: 950 },
+                          { label: 'Sat', value: 540 },
+                          { label: 'Sun', value: 410 },
+                        ]}
+                        valueFormatter={(v) => `${v}k`}
+                      />
+                    </ChartContainer>
+
+                    <ChartContainer
+                      title="Credential Status Distribution"
+                      subtitle="Proportional breakdown across key lifecycle states"
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--kui-space-2) 0' }}>
+                        <DonutChart
+                          segments={[
+                            { label: 'Active', value: 72, color: 'var(--kui-color-brand-primary)' },
+                            { label: 'Expiring', value: 18, color: 'var(--kui-color-warning)' },
+                            { label: 'Revoked', value: 10, color: 'var(--kui-color-danger)' },
+                          ]}
+                          centerLabel="100"
+                          centerSubtext="Total Keys"
+                        />
+                      </div>
+                    </ChartContainer>
+                  </Grid>
+                </div>
+
+                {/* Correlation Analysis & Stacked Categorical Ingress */}
+                <div className="kui-showcase-section">
+                  <div>
+                    <h2 style={{ fontSize: 'var(--kui-font-size-md)', margin: 0 }}>Distribution Correlation (`ScatterPlot`) & Ingress Composition (`StackedBarChart`)</h2>
+                    <p style={{ fontSize: 'var(--kui-font-size-xs)', margin: 0 }}>
+                      Payload-to-latency distribution correlation against SLA ceilings alongside multi-category HTTP response composition.
+                    </p>
+                  </div>
+
+                  <Grid columns="repeat(auto-fit, minmax(340px, 1fr))" gap={4}>
+                    <ChartContainer
+                      title="Payload Size vs Latency Distribution"
+                      subtitle="Ingress request payload (KB) vs Gateway roundtrip latency (ms)"
+                    >
+                      <ScatterPlot
+                        data={[
+                          { x: 12, y: 14.2, label: 'GET /v1/tokens', color: 'var(--kui-color-brand-primary)' },
+                          { x: 18, y: 15.8, label: 'GET /v1/keys', color: 'var(--kui-color-brand-primary)' },
+                          { x: 45, y: 18.2, label: 'POST /v1/auth', color: 'var(--kui-color-brand-primary)' },
+                          { x: 80, y: 19.5, label: 'POST /v1/events', color: 'var(--kui-color-brand-accent)' },
+                          { x: 120, y: 21.0, label: 'POST /v1/audit/batch', color: 'var(--kui-color-brand-accent)' },
+                          { x: 160, y: 22.8, label: 'PUT /v1/payloads/large', color: 'var(--kui-color-brand-accent)' },
+                          { x: 210, y: 26.4, label: 'POST /v1/export/zip', color: 'var(--kui-color-danger)' },
+                          { x: 28, y: 16.1, label: 'GET /v1/health', color: 'var(--kui-color-brand-primary)' },
+                          { x: 95, y: 19.8, label: 'POST /v1/webhooks', color: 'var(--kui-color-brand-accent)' },
+                          { x: 140, y: 23.2, label: 'POST /v1/sync', color: 'var(--kui-color-warning)' },
+                          { x: 180, y: 24.1, label: 'POST /v1/snapshot', color: 'var(--kui-color-warning)' },
+                          { x: 60, y: 17.5, label: 'GET /v1/metrics', color: 'var(--kui-color-brand-primary)' },
+                        ]}
+                        xAxisLabel="Payload Size (KB)"
+                        yAxisLabel="Latency (ms)"
+                        thresholdY={25}
+                        thresholdYLabel="25ms SLA Ceiling"
+                        xFormatter={(v) => `${v}KB`}
+                        yFormatter={(v) => `${v.toFixed(0)}ms`}
+                        height={240}
+                      />
+                    </ChartContainer>
+
+                    <ChartContainer
+                      title="HTTP Status Code Distribution (7 Days)"
+                      subtitle="Categorical breakdown of cluster ingress responses (Thousands)"
+                    >
+                      <StackedBarChart
+                        data={[
+                          {
+                            label: 'Mon',
+                            segments: [
+                              { key: '2xx', label: '2xx Success', value: 380, color: 'var(--kui-color-brand-primary)' },
+                              { key: '3xx', label: '3xx Redirect', value: 25, color: 'var(--kui-color-brand-accent)' },
+                              { key: '4xx', label: '4xx Client Err', value: 12, color: 'var(--kui-color-warning)' },
+                              { key: '5xx', label: '5xx Server Err', value: 3, color: 'var(--kui-color-danger)' },
+                            ],
+                          },
+                          {
+                            label: 'Tue',
+                            segments: [
+                              { key: '2xx', label: '2xx Success', value: 620, color: 'var(--kui-color-brand-primary)' },
+                              { key: '3xx', label: '3xx Redirect', value: 38, color: 'var(--kui-color-brand-accent)' },
+                              { key: '4xx', label: '4xx Client Err', value: 18, color: 'var(--kui-color-warning)' },
+                              { key: '5xx', label: '5xx Server Err', value: 4, color: 'var(--kui-color-danger)' },
+                            ],
+                          },
+                          {
+                            label: 'Wed',
+                            segments: [
+                              { key: '2xx', label: '2xx Success', value: 810, color: 'var(--kui-color-brand-primary)' },
+                              { key: '3xx', label: '3xx Redirect', value: 50, color: 'var(--kui-color-brand-accent)' },
+                              { key: '4xx', label: '4xx Client Err', value: 24, color: 'var(--kui-color-warning)' },
+                              { key: '5xx', label: '5xx Server Err', value: 6, color: 'var(--kui-color-danger)' },
+                            ],
+                          },
+                          {
+                            label: 'Thu',
+                            segments: [
+                              { key: '2xx', label: '2xx Success', value: 740, color: 'var(--kui-color-brand-primary)' },
+                              { key: '3xx', label: '3xx Redirect', value: 45, color: 'var(--kui-color-brand-accent)' },
+                              { key: '4xx', label: '4xx Client Err', value: 20, color: 'var(--kui-color-warning)' },
+                              { key: '5xx', label: '5xx Server Err', value: 5, color: 'var(--kui-color-danger)' },
+                            ],
+                          },
+                          {
+                            label: 'Fri',
+                            segments: [
+                              { key: '2xx', label: '2xx Success', value: 870, color: 'var(--kui-color-brand-primary)' },
+                              { key: '3xx', label: '3xx Redirect', value: 55, color: 'var(--kui-color-brand-accent)' },
+                              { key: '4xx', label: '4xx Client Err', value: 22, color: 'var(--kui-color-warning)' },
+                              { key: '5xx', label: '5xx Server Err', value: 3, color: 'var(--kui-color-danger)' },
+                            ],
+                          },
+                          {
+                            label: 'Sat',
+                            segments: [
+                              { key: '2xx', label: '2xx Success', value: 490, color: 'var(--kui-color-brand-primary)' },
+                              { key: '3xx', label: '3xx Redirect', value: 30, color: 'var(--kui-color-brand-accent)' },
+                              { key: '4xx', label: '4xx Client Err', value: 16, color: 'var(--kui-color-warning)' },
+                              { key: '5xx', label: '5xx Server Err', value: 4, color: 'var(--kui-color-danger)' },
+                            ],
+                          },
+                          {
+                            label: 'Sun',
+                            segments: [
+                              { key: '2xx', label: '2xx Success', value: 370, color: 'var(--kui-color-brand-primary)' },
+                              { key: '3xx', label: '3xx Redirect', value: 22, color: 'var(--kui-color-brand-accent)' },
+                              { key: '4xx', label: '4xx Client Err', value: 14, color: 'var(--kui-color-warning)' },
+                              { key: '5xx', label: '5xx Server Err', value: 4, color: 'var(--kui-color-danger)' },
+                            ],
+                          },
+                        ]}
+                        valueFormatter={(v) => `${v}k`}
+                        height={180}
+                      />
+                    </ChartContainer>
+                  </Grid>
+                </div>
+
+                {/* 7. Standalone Sparkline Gallery */}
+                <div className="kui-showcase-section">
+                  <div>
+                    <h2 style={{ fontSize: 'var(--kui-font-size-md)', margin: 0 }}>Sparkline Visualizations (`Sparkline`)</h2>
+                    <p style={{ fontSize: 'var(--kui-font-size-xs)', margin: 0 }}>
+                      Responsive inline SVG paths with automatic coordinate normalization, gradient area fills, and anchor dots.
+                    </p>
+                  </div>
+
+                  <Card variant="bordered">
+                    <Grid columns="repeat(auto-fit, minmax(200px, 1fr))" gap={4}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--kui-space-1)' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)' }}>
+                          Mint Gradient Area Fill:
+                        </span>
+                        <div style={{ height: '48px', padding: '4px', backgroundColor: 'var(--kui-color-surface-subtle)', borderRadius: 'var(--kui-radius-sm)' }}>
+                          <Sparkline data={[10, 22, 18, 35, 28, 45, 60]} fill />
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--kui-space-1)' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)' }}>
+                          Brand Forest High-Contrast:
+                        </span>
+                        <div style={{ height: '48px', padding: '4px', backgroundColor: 'var(--kui-color-surface-subtle)', borderRadius: 'var(--kui-radius-sm)' }}>
+                          <Sparkline data={[45, 38, 42, 28, 34, 22, 15]} color="var(--kui-color-brand-primary)" fill={false} strokeWidth={2.5} />
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--kui-space-1)' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)' }}>
+                          Warning Trajectory:
+                        </span>
+                        <div style={{ height: '48px', padding: '4px', backgroundColor: 'var(--kui-color-surface-subtle)', borderRadius: 'var(--kui-radius-sm)' }}>
+                          <Sparkline data={[5, 12, 18, 25, 34, 48, 62]} color="var(--kui-color-warning)" fill />
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--kui-space-1)' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)' }}>
+                          Recovery Curve (Danger to Safe):
+                        </span>
+                        <div style={{ height: '48px', padding: '4px', backgroundColor: 'var(--kui-color-surface-subtle)', borderRadius: 'var(--kui-radius-sm)' }}>
+                          <Sparkline data={[60, 52, 40, 28, 15, 8, 4]} color="var(--kui-color-danger)" fill />
+                        </div>
+                      </div>
+                    </Grid>
+                  </Card>
+                </div>
+
+                {/* 8. Security Audit Trail & Activity Timeline */}
+                <div className="kui-showcase-section">
+                  <div>
+                    <h2 style={{ fontSize: 'var(--kui-font-size-md)', margin: 0 }}>Security Audit Trail (`Timeline`)</h2>
+                    <p style={{ fontSize: 'var(--kui-font-size-xs)', margin: 0 }}>
+                      Continuous vertical connective track with milestone markers, relative timestamps, and actor avatars.
+                    </p>
+                  </div>
+
+                  <Card variant="bordered">
+                    <Timeline
+                      items={[
+                        {
+                          id: 'ev-1',
+                          title: 'TLS Gateway mTLS Certificate Auto-Rotated',
+                          timestamp: '8 mins ago',
+                          status: 'success',
+                          description: 'Synced new Let\'s Encrypt leaf certificate across 6 cluster nodes with zero downtime.',
+                        },
+                        {
+                          id: 'ev-2',
+                          title: 'API Key Revocation Request Processed',
+                          timestamp: '2 hours ago',
+                          status: 'warning',
+                          description: 'Key kui_dev_77fe...d0 revoked due to 90-day inactivity policy enforcement.',
+                          actor: { name: 'Kaleem Molani' },
+                        },
+                        {
+                          id: 'ev-3',
+                          title: 'HMAC Signature Mismatch Detected & Blocked',
+                          timestamp: '5 hours ago',
+                          status: 'danger',
+                          description: 'Edge router dropped 14 invalid payload attempts originating from untrusted CIDR block 198.51.100.4.',
+                        },
+                        {
+                          id: 'ev-4',
+                          title: 'Workload Trust Domain SPIFFE Federation Established',
+                          timestamp: 'Yesterday at 16:42 UTC',
+                          status: 'info',
+                          description: 'Federated SPIFFE trust bundle configured with ingress-proxy cluster authority.',
+                          actor: { name: 'DevOps Automated Bot' },
+                        },
+                        {
+                          id: 'ev-5',
+                          title: 'Routine Cluster Health Probe Succeeded',
+                          timestamp: '2 days ago',
+                          status: 'neutral',
+                          description: 'All 24 worker health checks returned HTTP 200 within 12ms threshold.',
+                        },
+                      ]}
+                    />
+                  </Card>
+                </div>
+              </div>
             )}
           </main>
         </div>

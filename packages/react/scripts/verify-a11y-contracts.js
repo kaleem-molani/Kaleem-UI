@@ -23,6 +23,16 @@ import {
   Sparkline,
   BarChart,
   DonutChart,
+  AreaChart,
+  Heatmap,
+  GaugeChart,
+  MetricBreakdownList,
+  FunnelChart,
+  RadarChart,
+  ScatterPlot,
+  StackedBarChart,
+  Treemap,
+  UptimeTracker,
   Spinner,
   InlineAlert,
 } from '../dist/index.js';
@@ -335,4 +345,119 @@ console.log('--- Running Accessibility & ARIA Contract Verification ---');
   console.log('[PASS] Zero-dependency SVG Charts accessibility & rendering contracts');
 }
 
-console.log('✓ All 18 accessibility & ARIA contracts verified successfully.');
+// 19. Advanced Analytics contracts (AreaChart, Heatmap, GaugeChart, MetricBreakdownList, FunnelChart)
+{
+  const aHtml = renderToString(React.createElement(AreaChart, {
+    data: [{ label: '00:00', reqs: 100 }, { label: '04:00', reqs: 250 }],
+    series: [{ key: 'reqs', name: 'Requests' }],
+  }));
+  assert(aHtml.includes('role="img"'), 'AreaChart must have role="img"');
+  assert(aHtml.includes('<path'), 'AreaChart must render series and area path');
+
+  const hHtml = renderToString(React.createElement(Heatmap, {
+    data: [{ x: '00', y: 'Mon', value: 42 }],
+    xLabels: ['00'],
+    yLabels: ['Mon'],
+  }));
+  assert(hHtml.includes('role="img"'), 'Heatmap must have role="img"');
+  assert(hHtml.includes('<rect'), 'Heatmap must render rect cells');
+
+  const gHtml = renderToString(React.createElement(GaugeChart, {
+    value: 99.9,
+    label: 'SLO Uptime',
+  }));
+  assert(gHtml.includes('99.9%'), 'GaugeChart must display value readout');
+  assert(gHtml.includes('SLO Uptime'), 'GaugeChart must display label');
+
+  const mHtml = renderToString(React.createElement(MetricBreakdownList, {
+    items: [{ id: '1', label: '/api/v1/auth', value: 45000, secondaryValue: '45%' }],
+  }));
+  assert(mHtml.includes('/api/v1/auth'), 'MetricBreakdownList must render item label');
+  assert(mHtml.includes('#1'), 'MetricBreakdownList must display rank');
+
+  const fHtml = renderToString(React.createElement(FunnelChart, {
+    stages: [
+      { id: '1', name: 'Handshake', count: 1000 },
+      { id: '2', name: 'Auth', count: 850 },
+    ],
+  }));
+  assert(fHtml.includes('Handshake'), 'FunnelChart must render stage name');
+  assert(fHtml.includes('85% converted'), 'FunnelChart must calculate conversion rate');
+  console.log('[PASS] Advanced Analytics components contracts (AreaChart, Heatmap, GaugeChart, MetricBreakdownList, FunnelChart)');
+}
+
+// 20. Enterprise Analytics Suite contracts (RadarChart, ScatterPlot, StackedBarChart, Treemap, UptimeTracker)
+{
+  const rHtml = renderToString(React.createElement(RadarChart, {
+    metrics: [
+      { key: 'latency', label: 'Latency' },
+      { key: 'throughput', label: 'Throughput' },
+      { key: 'security', label: 'Security' },
+    ],
+    series: [
+      { id: 'prod', name: 'Production', data: { latency: 80, throughput: 90, security: 95 } },
+    ],
+  }));
+  assert(rHtml.includes('role="img"'), 'RadarChart must have role="img"');
+  assert(rHtml.includes('<polygon'), 'RadarChart must render polygon paths');
+  assert(rHtml.includes('Latency'), 'RadarChart must render metric labels');
+
+  const sHtml = renderToString(React.createElement(ScatterPlot, {
+    data: [
+      { x: 10, y: 25, label: 'Cluster A' },
+      { x: 20, y: 50, label: 'Cluster B' },
+    ],
+    thresholdY: 40,
+    thresholdYLabel: 'SLO Ceiling',
+  }));
+  assert(sHtml.includes('role="img"'), 'ScatterPlot must have role="img"');
+  assert(sHtml.includes('<circle'), 'ScatterPlot must render point circles');
+  assert(sHtml.includes('SLO Ceiling'), 'ScatterPlot must render threshold label');
+
+  const sbHtml = renderToString(React.createElement(StackedBarChart, {
+    data: [
+      {
+        label: 'Mon',
+        segments: [
+          { key: '2xx', label: '200 OK', value: 80 },
+          { key: '5xx', label: '500 Error', value: 20 },
+        ],
+      },
+    ],
+  }));
+  assert(sbHtml.includes('role="img"'), 'StackedBarChart must have role="img"');
+  assert(sbHtml.includes('Mon'), 'StackedBarChart must render item labels');
+  assert(sbHtml.includes('200 OK'), 'StackedBarChart must render segment legend/tooltips');
+
+  const tHtml = renderToString(React.createElement(Treemap, {
+    data: [
+      { id: 's3', label: 'Object Storage', value: 500 },
+      { id: 'db', label: 'Postgres DB', value: 300 },
+    ],
+  }));
+  assert(tHtml.includes('role="img"'), 'Treemap must have role="img"');
+  assert(tHtml.includes('<rect'), 'Treemap must render rect tiles');
+  assert(tHtml.includes('Object Storage'), 'Treemap must render node labels');
+
+  const uHtml = renderToString(React.createElement(UptimeTracker, {
+    services: [
+      {
+        id: 'api-gw',
+        name: 'API Gateway',
+        currentStatus: 'operational',
+        uptimePercentage: 99.99,
+        latencyMs: 14,
+        history: [
+          { date: '2026-10-15', status: 'operational' },
+          { date: '2026-10-16', status: 'operational' },
+        ],
+      },
+    ],
+  }));
+  assert(uHtml.includes('role="region"'), 'UptimeTracker must have role="region"');
+  assert(uHtml.includes('API Gateway'), 'UptimeTracker must render service name');
+  assert(uHtml.includes('99.99% uptime'), 'UptimeTracker must display uptime percentage');
+  console.log('[PASS] Enterprise Analytics Suite contracts (RadarChart, ScatterPlot, StackedBarChart, Treemap, UptimeTracker)');
+}
+
+console.log('✓ All 20 accessibility & ARIA contracts verified successfully.');
