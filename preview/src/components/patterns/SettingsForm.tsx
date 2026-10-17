@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import {
   Input,
-  Select,
   Checkbox,
   Textarea,
+
+
   RadioGroup,
   Button,
   Badge,
   InlineAlert,
 } from '../primitives';
+import { CustomSelect } from '@kaleem-ui/react';
+
 
 export const SettingsFormPattern: React.FC<{
   onCancel?: () => void;
@@ -97,17 +100,33 @@ export const SettingsFormPattern: React.FC<{
           onChange={(e) => setNotes(e.target.value)}
         />
 
-        <Select
+        <CustomSelect
           label="Target Environment"
           description="Access credentials cannot cross boundary perimeters."
           options={[
-            { label: 'Production (Highly Restricted)', value: 'Production' },
-            { label: 'Staging (Internal Integration)', value: 'Staging' },
-            { label: 'Development (Sandbox Sandbox)', value: 'Development' },
+            {
+              value: 'Production',
+              label: 'Production (Highly Restricted)',
+              description: 'Strict mTLS & audit logging enabled',
+              badge: <Badge variant="danger" size="sm">Restricted</Badge>,
+            },
+            {
+              value: 'Staging',
+              label: 'Staging (Internal Integration)',
+              description: 'Shared integration cluster',
+              badge: <Badge variant="warning" size="sm">Staging</Badge>,
+            },
+            {
+              value: 'Development',
+              label: 'Development (Sandbox Sandbox)',
+              description: 'Ephemeral local test runner',
+              badge: <Badge variant="neutral" size="sm">Sandbox</Badge>,
+            },
           ]}
           value={environment}
-          onChange={(e) => setEnvironment(e.target.value)}
+          onChange={(val) => setEnvironment(val)}
         />
+
 
         <RadioGroup
           label="Credential Lifespan"

@@ -654,6 +654,8 @@ export interface HeatmapProps {
   yLabels?: string[];
   colorScale?: string[];
   cellSize?: number;
+  cellWidth?: number;
+  cellHeight?: number;
   cellRadius?: number;
   gap?: number;
   ariaLabel?: string;
@@ -667,15 +669,17 @@ export const Heatmap: React.FC<HeatmapProps> = ({
   xLabels,
   yLabels,
   colorScale = [
-    'var(--kui-color-surface-subtle)',
-    'rgba(131, 240, 192, 0.25)',
-    'rgba(131, 240, 192, 0.55)',
-    'var(--kui-color-brand-primary)',
-    'var(--kui-color-accent)',
+    'var(--kui-color-surface-subtle)', // 0: empty (#EEF1EE)
+    '#CFE9DC',                         // 1: low (soft mint)
+    '#83F0C0',                         // 2: medium-low (cool mint)
+    '#4CCF98',                         // 3: medium-high (vibrant emerald)
+    '#167653',                         // 4: peak (deep evergreen)
   ],
-  cellSize = 18,
-  cellRadius = 3,
-  gap = 3,
+  cellSize,
+  cellWidth,
+  cellHeight,
+  cellRadius = 4,
+  gap = 4,
   ariaLabel = 'Activity heatmap',
   legend = true,
   className = '',
@@ -691,41 +695,66 @@ export const Heatmap: React.FC<HeatmapProps> = ({
     cellMap.set(`${d.x}-${d.y}`, d);
   });
 
-  const labelWidth = 36;
-  const headerHeight = 20;
-  const gridWidth = computedXLabels.length * (cellSize + gap);
-  const gridHeight = computedYLabels.length * (cellSize + gap);
-  const totalSvgWidth = labelWidth + gridWidth + 10;
-  const totalSvgHeight = headerHeight + gridHeight + (legend ? 30 : 10);
+  // Calculate cell width to ensure xLabels NEVER collide:
+  // If xLabels contain 4+ characters (e.g. "00:00"), cellWidth needs at least 52px.
+  const hasLongLabels = computedXLabels.some((l) => String(l).length > 3);
+  const resolvedCellWidth =
+    cellWidth ?? (cellSize && cellSize >= 48 ? cellSize : hasLongLabels ? 58 : (cellSize || 24));
+  const resolvedCellHeight = cellHeight ?? cellSize ?? 26;
+
+  // Sampling step for X labels if columns are narrow (< 44px)
+  const labelInterval = resolvedCellWidth < 44 ? Math.ceil(44 / (resolvedCellWidth + gap)) : 1;
+
+  const labelWidth = Math.max(42, ...computedYLabels.map((l) => String(l).length * 8 + 10));
+  const headerHeight = 24;
+  const gridWidth = computedXLabels.length * (resolvedCellWidth + gap) - gap;
+  const gridHeight = computedYLabels.length * (resolvedCellHeight + gap) - gap;
+  const totalSvgWidth = labelWidth + gridWidth + 16;
+  const totalSvgHeight = headerHeight + gridHeight + (legend ? 34 : 10);
 
   const getColor = (val: number) => {
     if (val <= 0) return colorScale[0];
     const fraction = val / maxVal;
     if (fraction < 0.25) return colorScale[1];
     if (fraction < 0.5) return colorScale[2];
-    if (fraction < 0.8) return colorScale[3];
+    if (fraction < 0.75) return colorScale[3];
     return colorScale[4];
   };
 
   return (
-    <div className={className} style={{ width: '100%', overflowX: 'auto', ...style }}>
+    <div
+      className={className}
+      style={{
+        width: '100%',
+        overflowX: 'auto',
+        fontFamily: 'var(--kui-font-sans)',
+        ...style,
+      }}
+    >
       <svg
         viewBox={`0 0 ${totalSvgWidth} ${totalSvgHeight}`}
-        style={{ minWidth: totalSvgWidth, height: 'auto', display: 'block' }}
+        width="100%"
+        style={{
+          maxWidth: `${totalSvgWidth}px`,
+          height: 'auto',
+          display: 'block',
+          margin: '0 auto',
+        }}
         role="img"
         aria-label={ariaLabel}
       >
+        {/* X-Axis Header Labels */}
         {computedXLabels.map((xl, xi) => {
-          const sample = computedXLabels.length > 12 ? Math.ceil(computedXLabels.length / 8) : 1;
-          if (xi % sample !== 0 && xi !== computedXLabels.length - 1) return null;
+          if (xi % labelInterval !== 0 && xi !== computedXLabels.length - 1) return null;
           return (
             <text
               key={xl}
-              x={labelWidth + xi * (cellSize + gap) + cellSize / 2}
-              y={headerHeight - 6}
+              x={labelWidth + xi * (resolvedCellWidth + gap) + resolvedCellWidth / 2}
+              y={headerHeight - 7}
               textAnchor="middle"
               fill="var(--kui-color-text-secondary)"
-              fontSize="10"
+              fontSize="11"
+              fontWeight="var(--kui-font-weight-medium)"
               fontFamily="var(--kui-font-sans)"
             >
               {xl}
@@ -733,23 +762,25 @@ export const Heatmap: React.FC<HeatmapProps> = ({
           );
         })}
 
+        {/* Y-Axis Row Labels and Cells */}
         {computedYLabels.map((yl, yi) => {
-          const yPos = headerHeight + yi * (cellSize + gap);
+          const yPos = headerHeight + yi * (resolvedCellHeight + gap);
           return (
             <g key={yl}>
               <text
-                x={labelWidth - 6}
-                y={yPos + cellSize / 2 + 3}
+                x={labelWidth - 8}
+                y={yPos + resolvedCellHeight / 2 + 4}
                 textAnchor="end"
                 fill="var(--kui-color-text-secondary)"
-                fontSize="10"
+                fontSize="11"
+                fontWeight="var(--kui-font-weight-medium)"
                 fontFamily="var(--kui-font-sans)"
               >
                 {yl}
               </text>
 
               {computedXLabels.map((xl, xi) => {
-                const xPos = labelWidth + xi * (cellSize + gap);
+                const xPos = labelWidth + xi * (resolvedCellWidth + gap);
                 const cell = cellMap.get(`${xl}-${yl}`);
                 const val = cell ? cell.value : 0;
                 const fill = getColor(val);
@@ -759,12 +790,16 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                     key={`${xl}-${yl}`}
                     x={xPos}
                     y={yPos}
-                    width={cellSize}
-                    height={cellSize}
+                    width={resolvedCellWidth}
+                    height={resolvedCellHeight}
                     rx={cellRadius}
                     fill={fill}
-                    stroke="var(--kui-color-border)"
-                    strokeWidth="0.5"
+                    stroke="var(--kui-color-surface)"
+                    strokeWidth="1"
+                    style={{
+                      transition: 'opacity 100ms ease',
+                      cursor: 'pointer',
+                    }}
                   >
                     <title>{cell?.label || `${yl} ${xl}: ${val}`}</title>
                   </rect>
@@ -774,12 +809,13 @@ export const Heatmap: React.FC<HeatmapProps> = ({
           );
         })}
 
+        {/* Legend */}
         {legend && (
-          <g transform={`translate(${labelWidth}, ${headerHeight + gridHeight + 12})`}>
+          <g transform={`translate(${labelWidth}, ${headerHeight + gridHeight + 14})`}>
             <text
               x={0}
               y={10}
-              fill="var(--kui-color-text-secondary)"
+              fill="var(--kui-color-text-muted)"
               fontSize="10"
               fontFamily="var(--kui-font-sans)"
             >
@@ -788,20 +824,20 @@ export const Heatmap: React.FC<HeatmapProps> = ({
             {colorScale.map((col, idx) => (
               <rect
                 key={idx}
-                x={30 + idx * 16}
-                y={1}
-                width={12}
-                height={12}
-                rx={2}
+                x={32 + idx * 18}
+                y={0}
+                width={14}
+                height={14}
+                rx={3}
                 fill={col}
                 stroke="var(--kui-color-border)"
                 strokeWidth="0.5"
               />
             ))}
             <text
-              x={30 + colorScale.length * 16 + 6}
+              x={32 + colorScale.length * 18 + 6}
               y={10}
-              fill="var(--kui-color-text-secondary)"
+              fill="var(--kui-color-text-muted)"
               fontSize="10"
               fontFamily="var(--kui-font-sans)"
             >

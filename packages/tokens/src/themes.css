@@ -110,6 +110,8 @@
   --kui-color-border-strong: #C3CEC6;
 
   --kui-color-brand: #102C27;
+  --kui-color-brand-primary: #167653;
+  --kui-color-brand-accent: #83F0C0;
   --kui-color-brand-hover: #104F3C;
   --kui-color-accent: #83F0C0;
 
@@ -155,6 +157,8 @@
   --kui-color-border-strong: #4A5A50;
 
   --kui-color-brand: #83F0C0;
+  --kui-color-brand-primary: #83F0C0;
+  --kui-color-brand-accent: #83F0C0;
   --kui-color-brand-hover: #A5F5D2;
   --kui-color-accent: #83F0C0;
 
@@ -197,6 +201,8 @@
     --kui-color-border-strong: #4A5A50;
 
     --kui-color-brand: #83F0C0;
+    --kui-color-brand-primary: #83F0C0;
+    --kui-color-brand-accent: #83F0C0;
     --kui-color-brand-hover: #A5F5D2;
     --kui-color-accent: #83F0C0;
 
@@ -237,6 +243,28 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Animation Keyframes */
+@keyframes kui-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+@keyframes kui-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes kui-dropdown-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 

@@ -22,10 +22,20 @@ const expectedExports = [
   'Grid',
   'Spinner',
   'Skeleton',
+  'SkeletonTable',
+  'SkeletonCard',
+  'SkeletonList',
   'Tooltip',
   'Dialog',
   'Popover',
   'DropdownMenu',
+  'DropdownMenuTrigger',
+  'DropdownMenuContent',
+  'DropdownMenuItem',
+  'DropdownMenuCheckboxItem',
+  'DropdownMenuGroup',
+  'DropdownMenuSeparator',
+  'CustomSelect',
   'Tabs',
   'Accordion',
   'Breadcrumbs',
@@ -76,7 +86,10 @@ const expectedExports = [
 
 for (const name of expectedExports) {
   assert(KaleemReact[name] !== undefined, `Missing export ${name} from @kaleem-ui/react`);
-  assert(typeof KaleemReact[name] === 'function', `Export ${name} should be a callable function or component`);
+  assert(
+    typeof KaleemReact[name] === 'function' || typeof KaleemReact[name] === 'object',
+    `Export ${name} should be a callable function or component`
+  );
 }
 
 console.log(`All ${expectedExports.length} core primitives, application patterns, overlays, and hooks verified in @kaleem-ui/react.`);

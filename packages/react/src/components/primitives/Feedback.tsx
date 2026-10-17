@@ -67,6 +67,7 @@ export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   height?: string | number;
   radius?: 'none' | 'sm' | 'md' | 'lg' | 'full';
   variant?: 'text' | 'rect' | 'circle';
+  animation?: 'shimmer' | 'pulse' | 'none';
 }
 
 export const Skeleton: React.FC<SkeletonProps> = ({
@@ -74,6 +75,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   height,
   radius,
   variant = 'text',
+  animation = 'shimmer',
   style,
   ...props
 }) => {
@@ -88,6 +90,24 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   const resolvedWidth = width ?? (variant === 'circle' ? 40 : '100%');
   const resolvedHeight = height ?? (variant === 'circle' ? 40 : variant === 'text' ? '1rem' : '4rem');
 
+  const animationStyles: React.CSSProperties =
+    animation === 'shimmer'
+      ? {
+          backgroundImage:
+            'linear-gradient(90deg, var(--kui-color-surface-subtle) 25%, var(--kui-color-border) 50%, var(--kui-color-surface-subtle) 75%)',
+          backgroundSize: '200% 100%',
+          animation: 'kui-shimmer 1.8s ease-in-out infinite',
+        }
+      : animation === 'pulse'
+        ? {
+            backgroundColor: 'var(--kui-color-surface-subtle)',
+            animation: 'kui-pulse 1.6s ease-in-out infinite',
+          }
+        : {
+            backgroundColor: 'var(--kui-color-surface-subtle)',
+            animation: 'none',
+          };
+
   return (
     <div
       aria-hidden="true"
@@ -95,11 +115,11 @@ export const Skeleton: React.FC<SkeletonProps> = ({
         width: resolvedWidth,
         height: resolvedHeight,
         borderRadius: resolvedRadius,
-        backgroundColor: 'var(--kui-color-surface-subtle)',
-        animation: 'kui-pulse 1.6s ease-in-out infinite',
+        ...animationStyles,
         ...style,
       }}
       {...props}
     />
   );
 };
+

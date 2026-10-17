@@ -9,8 +9,8 @@ import {
   Separator,
   InlineAlert,
   Input,
-  Select,
   Checkbox,
+
   Switch,
   Textarea,
   RadioGroup,
@@ -22,10 +22,14 @@ import {
   Grid,
   Spinner,
   Skeleton,
+  SkeletonTable,
+  SkeletonCard,
+  SkeletonList,
   Tooltip,
   Dialog,
   Popover,
   DropdownMenu,
+  CustomSelect,
   Tabs,
   Accordion,
   PageHeader,
@@ -123,7 +127,11 @@ const PreviewContent: React.FC = () => {
   const [tableHeightMode, setTableHeightMode] = useState<DataTableHeightMode>('fixed');
   const [stepperStep, setStepperStep] = useState(1);
   const [analyticsRange, setAnalyticsRange] = useState<'24h' | '7d' | '30d' | 'quarter'>('7d');
+  const [customSelectVal, setCustomSelectVal] = useState<string>('chase');
+  const [dropdownShowMeta, setDropdownShowMeta] = useState<boolean>(true);
+  const [skeletonAnimation, setSkeletonAnimation] = useState<'shimmer' | 'pulse' | 'none'>('shimmer');
   const toast = useToast();
+
 
   // Escape key handler for dialog and mobile drawer
   useEffect(() => {
@@ -669,17 +677,37 @@ const PreviewContent: React.FC = () => {
                       onChange={() => {}}
                     />
 
-                    <Select
+                    <CustomSelect
                       label="Region Selection"
                       description="Physical cloud datacenter perimeter"
                       options={[
-                        { label: 'us-east-1 (N. Virginia)', value: 'us-east-1' },
-                        { label: 'eu-central-1 (Frankfurt)', value: 'eu-central-1' },
-                        { label: 'ap-southeast-1 (Singapore)', value: 'ap-southeast-1' },
+                        {
+                          value: 'us-east-1',
+                          label: 'us-east-1 (N. Virginia)',
+                          description: 'Primary datacenter • 14ms latency',
+                          icon: <LayersIcon size={14} />,
+                          badge: <Badge variant="success" size="sm">Primary</Badge>,
+                        },
+                        {
+                          value: 'eu-central-1',
+                          label: 'eu-central-1 (Frankfurt)',
+                          description: 'European hub • 82ms latency',
+                          icon: <LayersIcon size={14} />,
+                          badge: <Badge variant="info" size="sm">Active</Badge>,
+                        },
+                        {
+                          value: 'ap-southeast-1',
+                          label: 'ap-southeast-1 (Singapore)',
+                          description: 'APAC gateway • 140ms latency',
+                          icon: <LayersIcon size={14} />,
+                        },
                       ]}
                       value={testSelect}
-                      onChange={(e) => setTestSelect(e.target.value)}
+                      onChange={(val) => setTestSelect(val)}
+                      searchable
+                      clearable
                     />
+
                   </div>
 
                   <Textarea
@@ -916,34 +944,206 @@ const PreviewContent: React.FC = () => {
                       <DropdownMenu
                         trigger={
                           <Button variant="outline" size="sm">
-                            Actions Menu ▾
+                            Rich Actions Menu ▾
                           </Button>
                         }
                         items={[
-                          { id: 'view', label: 'Inspect Logs', onClick: () => {} },
-                          { id: 'rotate', label: 'Rotate Secret', onClick: () => {} },
-                          { id: 'revoke', label: 'Revoke Key', danger: true, onClick: () => {} },
+                          {
+                            type: 'header',
+                            content: (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--kui-space-2)' }}>
+                                <Avatar size="sm" alt="KM" name="Kaleem UI Node" />
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                  <span style={{ fontSize: '13px', fontWeight: 600 }}>Kaleem UI Node</span>
+                                  <span style={{ fontSize: '11px', color: 'var(--kui-color-text-muted)' }}>prod-east-primary</span>
+                                </div>
+                              </div>
+                            ),
+                          },
+                          {
+                            type: 'group',
+                            label: 'Diagnostics',
+                            items: [
+                              {
+                                id: 'view',
+                                label: 'Inspect Logs',
+                                description: 'Real-time telemetry stream',
+                                icon: <LayersIcon size={14} />,
+                                shortcut: '⌘L',
+                                onClick: () => toast.show({ title: 'Opening Logs', message: 'Streaming real-time telemetry.', variant: 'info' }),
+                              },
+                              {
+                                id: 'rotate',
+                                label: 'Rotate Secret',
+                                description: 'Zero-downtime key rotation',
+                                icon: <RefreshIcon size={14} />,
+                                shortcut: '⌥R',
+                                onClick: () => toast.show({ title: 'Rotating Key', message: 'Issued secret rotation request.', variant: 'success' }),
+                              },
+                              {
+                                id: 'meta',
+                                type: 'checkbox',
+                                label: 'Include Metadata',
+                                description: 'Export full JSON headers',
+                                checked: dropdownShowMeta,
+                                onCheckedChange: (c) => setDropdownShowMeta(c),
+                              },
+                            ],
+                          },
+                          { type: 'separator' },
+                          {
+                            id: 'revoke',
+                            label: 'Revoke Key',
+                            description: 'Immediately disables webhook traffic',
+                            danger: true,
+                            icon: <XIcon size={14} />,
+                            shortcut: '⇧⌘⌫',
+                            onClick: () => toast.show({ title: 'Revoked', message: 'API key has been revoked.', variant: 'danger' }),
+                          },
                         ]}
                       />
+
+                      <DropdownMenu>
+                        <DropdownMenu.Trigger>
+                          <Button variant="ghost" size="sm">
+                            <Avatar size="sm" alt="KM" name="Kaleem Molani" />
+                            <span style={{ marginLeft: '6px' }}>Account ▾</span>
+                          </Button>
+                        </DropdownMenu.Trigger>
+                        <DropdownMenu.Content align="end">
+                          <DropdownMenu.Header>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                              <span style={{ fontSize: '13px', fontWeight: 600 }}>Kaleem Molani</span>
+                              <span style={{ fontSize: '11px', color: 'var(--kui-color-text-muted)' }}>admin@kaleem.ui</span>
+                            </div>
+                          </DropdownMenu.Header>
+                          <DropdownMenu.Group label="Workspaces">
+                            <DropdownMenu.Item icon={<ShieldIcon size={14} />} shortcut="⌘1">Production Cluster</DropdownMenu.Item>
+                            <DropdownMenu.Item icon={<LayersIcon size={14} />} shortcut="⌘2">Staging Sandbox</DropdownMenu.Item>
+                          </DropdownMenu.Group>
+                          <DropdownMenu.Separator />
+                          <DropdownMenu.Item
+                            danger
+                            icon={<XIcon size={14} />}
+                            onClick={() => toast.show({ title: 'Signed Out', message: 'Session closed.', variant: 'info' })}
+                          >
+                            Sign Out
+                          </DropdownMenu.Item>
+                        </DropdownMenu.Content>
+                      </DropdownMenu>
 
                       <Button variant="primary" size="sm" onClick={() => setIsCreateModalOpen(true)}>
                         Open Native Dialog
                       </Button>
                     </Inline>
 
+                    {/* Rich CustomSelect Dropdown Showcase */}
                     <div style={{ borderTop: '1px solid var(--kui-color-border)', paddingTop: 'var(--kui-space-3)' }}>
                       <span style={{ fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)', display: 'block', marginBottom: 'var(--kui-space-2)' }}>
-                        Feedback Primitives (Spinner & Skeletons):
+                        Rich CustomSelect Primitive (Searchable, Filterable, Option Icons & Subtitles):
                       </span>
-                      <Inline gap={4} align="center">
-                        <Spinner size={18} label="Synchronizing tokens" />
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--kui-space-1)', flex: 1, maxWidth: '280px' }}>
-                          <Skeleton variant="text" width="80%" height="12px" />
-                          <Skeleton variant="text" width="60%" height="10px" />
-                        </div>
-                        <Skeleton variant="circle" width={32} height={32} />
-                      </Inline>
+                      <div style={{ maxWidth: '380px' }}>
+                        <CustomSelect
+                          label="Active Funding Account"
+                          description="Select payment route for settlement (searchable & clearable)"
+                          placeholder="Choose an account..."
+                          value={customSelectVal}
+                          onChange={(val) => {
+                            setCustomSelectVal(val);
+                            toast.show({ title: 'Account Selected', message: `Active route updated to ${val}.`, variant: 'success' });
+                          }}
+                          searchable
+                          clearable
+                          options={[
+                            {
+                              label: 'Commercial Banking',
+                              options: [
+                                {
+                                  value: 'chase',
+                                  label: 'Chase Premier Checking',
+                                  description: 'Account •••• 4921 ($14,250.00)',
+                                  icon: <KeyIcon size={14} />,
+                                  badge: <Badge variant="success">Primary</Badge>,
+                                },
+                                {
+                                  value: 'silicon',
+                                  label: 'SVB Operating Reserve',
+                                  description: 'Account •••• 1084 ($82,900.00)',
+                                  icon: <ShieldIcon size={14} />,
+                                  badge: <Badge variant="info">Verified</Badge>,
+                                },
+                              ],
+                            },
+                            {
+                              label: 'Corporate Cards',
+                              options: [
+                                {
+                                  value: 'amex',
+                                  label: 'American Express Platinum',
+                                  description: 'Corporate Card •••• 8820',
+                                  icon: <LayersIcon size={14} />,
+                                },
+                                {
+                                  value: 'brex',
+                                  label: 'Brex Treasury Card',
+                                  description: 'Corporate Card •••• 3319',
+                                  icon: <LayersIcon size={14} />,
+                                },
+                              ],
+                            },
+                          ]}
+                        />
+                      </div>
                     </div>
+
+                    <div style={{ borderTop: '1px solid var(--kui-color-border)', paddingTop: 'var(--kui-space-3)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--kui-space-2)' }}>
+                        <span style={{ fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)' }}>
+                          Feedback Primitives & Composite Skeletons:
+                        </span>
+                        <Inline gap={2} align="center">
+                          <span style={{ fontSize: '11px', color: 'var(--kui-color-text-muted)' }}>Animation:</span>
+                          {(['shimmer', 'pulse', 'none'] as const).map((mode) => (
+                            <button
+                              key={mode}
+                              type="button"
+                              onClick={() => setSkeletonAnimation(mode)}
+                              style={{
+                                padding: '2px 8px',
+                                fontSize: '11px',
+                                borderRadius: 'var(--kui-radius-sm)',
+                                border: '1px solid var(--kui-color-border)',
+                                backgroundColor: skeletonAnimation === mode ? 'var(--kui-color-brand-primary)' : 'var(--kui-color-surface-subtle)',
+                                color: skeletonAnimation === mode ? 'var(--kui-color-surface)' : 'var(--kui-color-text-primary)',
+                                cursor: 'pointer',
+                                fontWeight: skeletonAnimation === mode ? 600 : 400,
+                              }}
+                            >
+                              {mode}
+                            </button>
+                          ))}
+                        </Inline>
+                      </div>
+
+                      <Stack gap={4}>
+                        <Inline gap={4} align="center">
+                          <Spinner size={18} label="Synchronizing tokens" />
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--kui-space-1)', flex: 1, maxWidth: '280px' }}>
+                            <Skeleton variant="text" width="80%" height="12px" animation={skeletonAnimation} />
+                            <Skeleton variant="text" width="60%" height="10px" animation={skeletonAnimation} />
+                          </div>
+                          <Skeleton variant="circle" width={32} height={32} animation={skeletonAnimation} />
+                        </Inline>
+
+                        <Grid columns={2} gap={4}>
+                          <SkeletonCard hasHeader hasAvatar hasMetric lines={2} hasAction animation={skeletonAnimation} />
+                          <SkeletonList items={3} hasAvatar lines={2} hasAction animation={skeletonAnimation} />
+                        </Grid>
+
+                        <SkeletonTable rows={3} columns={4} showCheckbox showHeader animation={skeletonAnimation} />
+                      </Stack>
+                    </div>
+
 
                     <div style={{ borderTop: '1px solid var(--kui-color-border)', paddingTop: 'var(--kui-space-3)' }}>
                       <span style={{ fontSize: 'var(--kui-font-size-xs)', fontWeight: 'var(--kui-font-weight-medium)', color: 'var(--kui-color-text-secondary)', display: 'block', marginBottom: 'var(--kui-space-2)' }}>
@@ -1607,7 +1807,9 @@ const PreviewContent: React.FC = () => {
                       ]}
                       xLabels={['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00']}
                       yLabels={['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']}
-                      cellSize={22}
+                      cellWidth={64}
+                      cellHeight={26}
+                      cellRadius={4}
                     />
                   </Card>
                 </div>

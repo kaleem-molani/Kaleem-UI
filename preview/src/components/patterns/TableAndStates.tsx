@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Badge, Button, IconButton, Checkbox, InlineAlert, Pagination } from '../primitives';
+import { SkeletonTable } from '@kaleem-ui/react';
+
 import {
   PlusIcon,
   RefreshIcon,
@@ -595,45 +597,10 @@ export const EmptyStatePattern: React.FC<{ onAction?: () => void }> = ({ onActio
 ---------------------------------------------------- */
 export const LoadingStatePattern: React.FC = () => {
   return (
-    <div
-      style={{
-        backgroundColor: 'var(--kui-color-surface)',
-        border: '1px solid var(--kui-color-border)',
-        borderRadius: 'var(--kui-radius-lg)',
-        overflow: 'hidden',
-        width: '100%',
-      }}
-      aria-busy="true"
-      aria-label="Loading credentials"
-    >
-      <div style={{ padding: 'var(--kui-space-3) var(--kui-space-4)', borderBottom: '1px solid var(--kui-color-border)', backgroundColor: 'var(--kui-color-surface-subtle)' }}>
-        <div style={{ height: '18px', width: '220px', backgroundColor: 'var(--kui-color-border)', borderRadius: 'var(--kui-radius-sm)', opacity: 0.6 }} />
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--kui-space-4)',
-              padding: 'var(--kui-space-4)',
-              borderBottom: i < 4 ? '1px solid var(--kui-color-border)' : 'none',
-            }}
-          >
-            <div style={{ width: '16px', height: '16px', borderRadius: 'var(--kui-radius-sm)', backgroundColor: 'var(--kui-color-border)', opacity: 0.5 }} />
-            <div style={{ height: '14px', width: '160px', borderRadius: 'var(--kui-radius-sm)', backgroundColor: 'var(--kui-color-border)', opacity: 0.7 }} />
-            <div style={{ height: '14px', width: '120px', borderRadius: 'var(--kui-radius-sm)', backgroundColor: 'var(--kui-color-border)', opacity: 0.5 }} />
-            <div style={{ height: '14px', width: '80px', borderRadius: 'var(--kui-radius-sm)', backgroundColor: 'var(--kui-color-border)', opacity: 0.5 }} />
-            <div style={{ height: '18px', width: '70px', borderRadius: 'var(--kui-radius-full)', backgroundColor: 'var(--kui-color-border)', opacity: 0.6 }} />
-            <div style={{ height: '14px', width: '90px', borderRadius: 'var(--kui-radius-sm)', backgroundColor: 'var(--kui-color-border)', opacity: 0.4, marginLeft: 'auto' }} />
-          </div>
-        ))}
-      </div>
-    </div>
+    <SkeletonTable rows={4} columns={5} showCheckbox showHeader animation="shimmer" />
   );
 };
+
 
 /* ----------------------------------------------------
    Inline Error State

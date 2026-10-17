@@ -35,7 +35,13 @@ import {
   UptimeTracker,
   Spinner,
   InlineAlert,
+  DropdownMenu,
+  CustomSelect,
+  SkeletonTable,
+  SkeletonCard,
+  SkeletonList,
 } from '../dist/index.js';
+
 
 console.log('--- Running Accessibility & ARIA Contract Verification ---');
 
@@ -460,4 +466,47 @@ console.log('--- Running Accessibility & ARIA Contract Verification ---');
   console.log('[PASS] Enterprise Analytics Suite contracts (RadarChart, ScatterPlot, StackedBarChart, Treemap, UptimeTracker)');
 }
 
-console.log('✓ All 20 accessibility & ARIA contracts verified successfully.');
+// 21. DropdownMenu & CustomSelect contracts
+{
+  const menuHtml = renderToString(React.createElement(DropdownMenu, {
+    trigger: React.createElement(Button, null, 'Actions'),
+    items: [
+      { id: 'view', label: 'View Records' },
+      { id: 'archive', label: 'Archive', danger: true },
+    ],
+  }));
+  assert(menuHtml.includes('aria-haspopup="menu"'), 'DropdownMenu trigger must have aria-haspopup="menu"');
+  assert(menuHtml.includes('aria-expanded="false"'), 'DropdownMenu trigger must start with aria-expanded="false"');
+
+  const selectHtml = renderToString(React.createElement(CustomSelect, {
+    label: 'Select Account',
+    options: [
+      { value: 'checking', label: 'Primary Checking' },
+      { value: 'savings', label: 'Savings Reserve' },
+    ],
+    value: 'checking',
+  }));
+  assert(selectHtml.includes('role="combobox"'), 'CustomSelect trigger must have role="combobox"');
+  assert(selectHtml.includes('aria-haspopup="listbox"'), 'CustomSelect trigger must have aria-haspopup="listbox"');
+  assert(selectHtml.includes('Primary Checking'), 'CustomSelect must render selected option label');
+  console.log('[PASS] DropdownMenu and CustomSelect ARIA contracts');
+}
+
+// 22. Composite Skeletons contracts
+{
+  const tableHtml = renderToString(React.createElement(SkeletonTable, { rows: 3, columns: 3 }));
+  assert(tableHtml.includes('role="status"'), 'SkeletonTable must have role="status"');
+  assert(tableHtml.includes('aria-busy="true"'), 'SkeletonTable must have aria-busy="true"');
+
+  const cardHtml = renderToString(React.createElement(SkeletonCard, { hasHeader: true, hasMetric: true }));
+  assert(cardHtml.includes('role="status"'), 'SkeletonCard must have role="status"');
+  assert(cardHtml.includes('aria-busy="true"'), 'SkeletonCard must have aria-busy="true"');
+
+  const listHtml = renderToString(React.createElement(SkeletonList, { items: 3 }));
+  assert(listHtml.includes('role="status"'), 'SkeletonList must have role="status"');
+  assert(listHtml.includes('aria-busy="true"'), 'SkeletonList must have aria-busy="true"');
+  console.log('[PASS] Composite Skeletons ARIA contracts (SkeletonTable, SkeletonCard, SkeletonList)');
+}
+
+console.log('✓ All 22 accessibility & ARIA contracts verified successfully.');
+
