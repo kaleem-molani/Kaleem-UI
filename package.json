@@ -9,8 +9,9 @@
     "typecheck": "tsc -b",
     "test": "pnpm --filter \"./packages/*\" test",
     "release:check": "node scripts/verify-release.js && node scripts/verify-consumer.js",
-    "publish:packages": "pnpm --filter @kaleem-ui/tokens publish --access public --no-git-checks && pnpm --filter @kaleem-ui/react publish --access public --no-git-checks"
+    "publish:packages": "pnpm --filter @kaleemmolani/tokens publish --access public --no-git-checks && pnpm --filter @kaleemmolani/react publish --access public --no-git-checks"
   },
+
 
   "devDependencies": {
     "oxlint": "^1.81.0",

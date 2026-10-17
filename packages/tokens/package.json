@@ -1,5 +1,6 @@
 {
-  "name": "@kaleem-ui/tokens",
+  "name": "@kaleemmolani/tokens",
+
   "version": "1.0.0",
   "description": "Design tokens and semantic CSS properties for Kaleem UI",
   "type": "module",

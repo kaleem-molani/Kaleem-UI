@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Badge, Button, IconButton, Checkbox, InlineAlert, Pagination } from '../primitives';
-import { SkeletonTable } from '@kaleem-ui/react';
+import { SkeletonTable } from '@kaleemmolani/react';
+
 
 import {
   PlusIcon,

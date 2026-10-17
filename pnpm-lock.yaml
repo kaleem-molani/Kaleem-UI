@@ -17,10 +17,10 @@ importers:
 
   apps/standalone-app:
     dependencies:
-      '@kaleem-ui/react':
+      '@kaleemmolani/react':
         specifier: workspace:*
         version: link:../../packages/react
-      '@kaleem-ui/tokens':
+      '@kaleemmolani/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens
       react:
@@ -32,7 +32,7 @@ importers:
 
   packages/react:
     dependencies:
-      '@kaleem-ui/tokens':
+      '@kaleemmolani/tokens':
         specifier: workspace:*
         version: link:../tokens
     devDependencies:
@@ -60,10 +60,10 @@ importers:
 
   preview:
     dependencies:
-      '@kaleem-ui/react':
+      '@kaleemmolani/react':
         specifier: workspace:*
         version: link:../packages/react
-      '@kaleem-ui/tokens':
+      '@kaleemmolani/tokens':
         specifier: workspace:*
         version: link:../packages/tokens
       react:

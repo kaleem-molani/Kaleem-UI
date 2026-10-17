@@ -10,8 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@kaleem-ui/react": "workspace:*",
-    "@kaleem-ui/tokens": "workspace:*",
+    "@kaleemmolani/react": "workspace:*",
+    "@kaleemmolani/tokens": "workspace:*",
+
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

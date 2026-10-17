@@ -1,5 +1,5 @@
 {
-  "name": "@kaleem-ui/react",
+  "name": "@kaleemmolani/react",
   "version": "1.0.0",
   "description": "React component library for Kaleem UI",
   "type": "module",
@@ -18,14 +18,14 @@
     "access": "public"
   },
   "scripts": {
-
     "build": "tsc -b",
     "test": "node scripts/verify-primitives.js",
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@kaleem-ui/tokens": "workspace:*"
+    "@kaleemmolani/tokens": "workspace:*"
   },
+
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"

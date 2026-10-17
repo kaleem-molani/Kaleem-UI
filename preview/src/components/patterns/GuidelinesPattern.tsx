@@ -6,7 +6,8 @@ import {
   Inline,
   Card,
   Badge,
-} from '@kaleem-ui/react';
+} from '@kaleemmolani/react';
+
 import { CheckIcon, XIcon, ShieldIcon } from '../common/Icons';
 import { ContrastAuditPattern } from './ContrastAudit';
 

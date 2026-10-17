@@ -10,7 +10,8 @@ import {
   Badge,
   InlineAlert,
 } from '../primitives';
-import { CustomSelect } from '@kaleem-ui/react';
+import { CustomSelect } from '@kaleemmolani/react';
+
 
 
 export const SettingsFormPattern: React.FC<{

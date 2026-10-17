@@ -9,12 +9,12 @@ const rootDir = path.resolve(__dirname, '..');
 
 console.log('--- Verifying Release Integrity & Package Outputs ---');
 
-// 1. Verify @kaleem-ui/tokens
+// 1. Verify @kaleemmolani/tokens
 {
   const tokensDir = path.join(rootDir, 'packages', 'tokens');
   const pkg = JSON.parse(fs.readFileSync(path.join(tokensDir, 'package.json'), 'utf8'));
 
-  assert.strictEqual(pkg.name, '@kaleem-ui/tokens');
+  assert.strictEqual(pkg.name, '@kaleemmolani/tokens');
   assert.strictEqual(pkg.type, 'module', 'tokens package must be ESM module');
   assert(pkg.exports['.'], 'tokens package must export root');
   assert(pkg.exports['./themes.css'], 'tokens package must export ./themes.css');
@@ -29,15 +29,15 @@ console.log('--- Verifying Release Integrity & Package Outputs ---');
   assert(css.includes('--kui-color-surface'), 'themes.css must define --kui-color-surface');
   assert(css.includes('@media (prefers-color-scheme: dark)'), 'themes.css must support system dark scheme');
 
-  console.log('[PASS] @kaleem-ui/tokens export structure and CSS bundle verified');
+  console.log('[PASS] @kaleemmolani/tokens export structure and CSS bundle verified');
 }
 
-// 2. Verify @kaleem-ui/react
+// 2. Verify @kaleemmolani/react
 {
   const reactDir = path.join(rootDir, 'packages', 'react');
   const pkg = JSON.parse(fs.readFileSync(path.join(reactDir, 'package.json'), 'utf8'));
 
-  assert.strictEqual(pkg.name, '@kaleem-ui/react');
+  assert.strictEqual(pkg.name, '@kaleemmolani/react');
   assert.strictEqual(pkg.type, 'module', 'react package must be ESM module');
   assert(pkg.exports['.'], 'react package must export root');
 
@@ -46,12 +46,12 @@ console.log('--- Verifying Release Integrity & Package Outputs ---');
 
   // Verify no rogue dependencies
   const deps = Object.keys(pkg.dependencies || {});
-  assert.deepStrictEqual(deps, ['@kaleem-ui/tokens'], 'react package must only depend on @kaleem-ui/tokens');
+  assert.deepStrictEqual(deps, ['@kaleemmolani/tokens'], 'react package must only depend on @kaleemmolani/tokens');
 
   assert(pkg.peerDependencies?.react, 'react must be in peerDependencies');
   assert(pkg.peerDependencies?.['react-dom'], 'react-dom must be in peerDependencies');
 
-  console.log('[PASS] @kaleem-ui/react clean dependency footprint and dist outputs verified');
+  console.log('[PASS] @kaleemmolani/react clean dependency footprint and dist outputs verified');
 }
 
 // 3. Verify Version Alignment

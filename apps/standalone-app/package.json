@@ -7,8 +7,9 @@
     "test": "node src/run.js"
   },
   "dependencies": {
-    "@kaleem-ui/tokens": "workspace:*",
-    "@kaleem-ui/react": "workspace:*",
+    "@kaleemmolani/tokens": "workspace:*",
+    "@kaleemmolani/react": "workspace:*",
+
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   }

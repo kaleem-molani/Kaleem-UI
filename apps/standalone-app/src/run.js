@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import { tokens } from '@kaleem-ui/tokens';
+import { tokens } from '@kaleemmolani/tokens';
 import {
   Button,
   Card,
@@ -10,14 +10,15 @@ import {
   Badge,
   Container,
   ThemeProvider,
-} from '@kaleem-ui/react';
+} from '@kaleemmolani/react';
 
 console.log('--- Verifying Standalone Consumer Application ---');
 
 // 1. Verify Tokens
 assert(tokens.color.brand.evergreen[500] === '#167653', 'Brand token must be accessible');
 assert(tokens.color.brand.evergreen[300] === '#83F0C0', 'Accent token must be accessible');
-console.log('[PASS] Standalone app loaded @kaleem-ui/tokens correctly');
+console.log('[PASS] Standalone app loaded @kaleemmolani/tokens correctly');
+
 
 // 2. Verify Component Composition
 function StandaloneDashboard() {

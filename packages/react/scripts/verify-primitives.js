@@ -85,13 +85,14 @@ const expectedExports = [
 ];
 
 for (const name of expectedExports) {
-  assert(KaleemReact[name] !== undefined, `Missing export ${name} from @kaleem-ui/react`);
+  assert(KaleemReact[name] !== undefined, `Missing export ${name} from @kaleemmolani/react`);
   assert(
     typeof KaleemReact[name] === 'function' || typeof KaleemReact[name] === 'object',
     `Export ${name} should be a callable function or component`
   );
 }
 
-console.log(`All ${expectedExports.length} core primitives, application patterns, overlays, and hooks verified in @kaleem-ui/react.`);
+console.log(`All ${expectedExports.length} core primitives, application patterns, overlays, and hooks verified in @kaleemmolani/react.`);
+
 
 import('./verify-a11y-contracts.js');

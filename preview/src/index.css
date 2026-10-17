@@ -1,4 +1,5 @@
-@import '@kaleem-ui/tokens/themes.css';
+@import '@kaleemmolani/tokens/themes.css';
+
 
 /* Kaleem UI --- Global Reset & Foundation */
 *, *::before, *::after {

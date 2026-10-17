@@ -7,7 +7,8 @@ import {
   Grid,
   Card,
   Badge,
-} from '@kaleem-ui/react';
+} from '@kaleemmolani/react';
+
 
 export const FoundationsPattern: React.FC = () => {
   const brandScale = [

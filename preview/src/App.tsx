@@ -66,7 +66,8 @@ import {
   StackedBarChart,
   Treemap,
   UptimeTracker,
-} from '@kaleem-ui/react';
+} from '@kaleemmolani/react';
+
 import {
   DataTablePattern,
   EmptyStatePattern,
