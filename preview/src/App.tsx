@@ -66,6 +66,9 @@ import {
   StackedBarChart,
   Treemap,
   UptimeTracker,
+  CommandPalette,
+  type CommandPaletteItem,
+  Kbd,
 } from '@kaleemmolani/react';
 
 import {
@@ -75,6 +78,7 @@ import {
   ErrorStatePattern,
 } from './components/patterns/TableAndStates';
 import { SettingsFormPattern } from './components/patterns/SettingsForm';
+import { ExpenseFormModal } from './components/patterns/ExpenseFormModal';
 import { FoundationsPattern } from './components/patterns/FoundationsPattern';
 import { GuidelinesPattern } from './components/patterns/GuidelinesPattern';
 import {
@@ -95,6 +99,7 @@ import {
   BarChartIcon,
   ActivityIcon,
   RefreshIcon,
+  SearchIcon,
 } from './components/common/Icons';
 import './App.css';
 
@@ -109,6 +114,8 @@ const PreviewContent: React.FC = () => {
   const [viewportMode, setViewportMode] = useState<ViewportMode>('desktop');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   // Primitives interactive sandbox states
   const [btnLoading, setBtnLoading] = useState(false);
@@ -157,6 +164,87 @@ const PreviewContent: React.FC = () => {
       document.body.style.overflow = '';
     };
   }, [isCreateModalOpen, mobileNavOpen]);
+
+  // Cmd+K global launcher listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const commandItems: CommandPaletteItem[] = [
+    {
+      id: 'cmd-record-tx',
+      label: 'Record New Transaction',
+      description: 'Log expense, revenue, or transfer in modal',
+      category: 'Transactions',
+      icon: <ActivityIcon size={16} />,
+      shortcut: ['⌘', 'T'],
+      onSelect: () => setIsExpenseModalOpen(true),
+    },
+    {
+      id: 'cmd-create-key',
+      label: 'Provision API Credential',
+      description: 'Generate scoped authentication token in modal',
+      category: 'Credentials',
+      icon: <PlusIcon size={16} />,
+      shortcut: ['⌘', 'N'],
+      onSelect: () => setIsCreateModalOpen(true),
+    },
+    {
+      id: 'cmd-nav-credentials',
+      label: 'Go to API Credentials',
+      description: 'Interactive DataTable reference screen',
+      category: 'Navigation',
+      icon: <KeyIcon size={16} />,
+      onSelect: () => setActiveSection('credentials'),
+    },
+    {
+      id: 'cmd-nav-analytics',
+      label: 'Go to Analytics & Telemetry',
+      description: 'Zero-dependency SVG charts, metrics & feeds',
+      category: 'Navigation',
+      icon: <BarChartIcon size={16} />,
+      onSelect: () => setActiveSection('analytics'),
+    },
+    {
+      id: 'cmd-nav-foundations',
+      label: 'Go to Foundations & Tokens',
+      description: 'Color tokens, spacing, typography & radii',
+      category: 'Navigation',
+      icon: <SlidersIcon size={16} />,
+      onSelect: () => setActiveSection('foundations'),
+    },
+    {
+      id: 'cmd-nav-components',
+      label: 'Go to Component Primitives',
+      description: 'Buttons, Inputs, Drawers, SegmentedControls',
+      category: 'Navigation',
+      icon: <LayersIcon size={16} />,
+      onSelect: () => setActiveSection('components'),
+    },
+    {
+      id: 'cmd-theme-dark',
+      label: 'Switch to Dark Theme',
+      description: 'Deep evergreen aesthetic with mint accents',
+      category: 'Preferences',
+      icon: <MoonIcon size={16} />,
+      onSelect: () => setPreference('dark'),
+    },
+    {
+      id: 'cmd-theme-light',
+      label: 'Switch to Light Theme',
+      description: 'Warm neutral canvas with high contrast',
+      category: 'Preferences',
+      icon: <SunIcon size={16} />,
+      onSelect: () => setPreference('light'),
+    },
+  ];
 
   const getSectionTitle = () => {
     switch (activeSection) {
@@ -360,6 +448,30 @@ const PreviewContent: React.FC = () => {
           </div>
 
           <div className="kui-topbar-right">
+            {/* Quick Command Palette Launcher */}
+            <button
+              type="button"
+              onClick={() => setIsCommandPaletteOpen(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 'var(--kui-space-2)',
+                padding: '4px 10px',
+                backgroundColor: 'var(--kui-color-surface-subtle)',
+                border: '1px solid var(--kui-color-border)',
+                borderRadius: 'var(--kui-radius-md)',
+                fontSize: 'var(--kui-font-size-xs)',
+                color: 'var(--kui-color-text-secondary)',
+                cursor: 'pointer',
+                transition: 'all var(--kui-motion-duration-fast) var(--kui-motion-ease-standard)',
+              }}
+              title="Open Command Menu (⌘K)"
+            >
+              <SearchIcon size={13} />
+              <span style={{ fontWeight: 'var(--kui-font-weight-medium)' }}>Search...</span>
+              <Kbd size="sm">⌘K</Kbd>
+            </button>
+
             {/* Viewport Simulation Selector */}
             <div
               style={{
@@ -439,14 +551,24 @@ const PreviewContent: React.FC = () => {
                 ]}
                 actions={
                   activeSection === 'credentials' ? (
-                    <Button
-                      variant="primary"
-                      size="md"
-                      leadingIcon={<PlusIcon size={15} />}
-                      onClick={() => setIsCreateModalOpen(true)}
-                    >
-                      Create API Key
-                    </Button>
+                    <div style={{ display: 'flex', gap: 'var(--kui-space-2)' }}>
+                      <Button
+                        variant="outline"
+                        size="md"
+                        leadingIcon={<ActivityIcon size={15} />}
+                        onClick={() => setIsExpenseModalOpen(true)}
+                      >
+                        Record Transaction
+                      </Button>
+                      <Button
+                        variant="primary"
+                        size="md"
+                        leadingIcon={<PlusIcon size={15} />}
+                        onClick={() => setIsCreateModalOpen(true)}
+                      >
+                        Create API Key
+                      </Button>
+                    </div>
                   ) : undefined
                 }
               />
@@ -2279,7 +2401,9 @@ const PreviewContent: React.FC = () => {
         onClose={() => setIsCreateModalOpen(false)}
         title="Provision Gateway Credential"
         description="Configure parameters and execution scopes for the new authentication key."
-        size="md"
+        icon={<KeyIcon size={18} />}
+        badge={<Badge variant="success" size="sm">Active Schema</Badge>}
+        size="lg"
       >
         <SettingsFormPattern
           onCancel={() => setIsCreateModalOpen(false)}
@@ -2289,6 +2413,19 @@ const PreviewContent: React.FC = () => {
           }}
         />
       </Dialog>
+
+      {/* Record Transaction / Expense Modal */}
+      <ExpenseFormModal
+        open={isExpenseModalOpen}
+        onClose={() => setIsExpenseModalOpen(false)}
+      />
+
+      {/* Global Command Palette (Cmd+K) */}
+      <CommandPalette
+        open={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        items={commandItems}
+      />
     </div>
   );
 };

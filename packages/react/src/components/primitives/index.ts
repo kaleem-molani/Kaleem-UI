@@ -18,4 +18,7 @@ export * from './Accordion.js';
 export * from './Pagination.js';
 export * from './Stepper.js';
 export * from './Skeleton.js';
+export * from './SegmentedControl.js';
+export * from './Drawer.js';
+export * from './Kbd.js';
 

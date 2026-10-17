@@ -268,3 +268,61 @@
   }
 }
 
+/* Dialog Backdrop & Animation */
+dialog::backdrop {
+  background-color: var(--kui-color-overlay);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: kui-fade-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes kui-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes kui-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes kui-slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes kui-slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Subtle scrollbars for dialog bodies & dropdown menus */
+.kui-scrollbar-subtle::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.kui-scrollbar-subtle::-webkit-scrollbar-track {
+  background: transparent;
+}
+.kui-scrollbar-subtle::-webkit-scrollbar-thumb {
+  background: var(--kui-color-border);
+  border-radius: var(--kui-radius-full);
+}
+.kui-scrollbar-subtle::-webkit-scrollbar-thumb:hover {
+  background: var(--kui-color-border-strong);
+}
+

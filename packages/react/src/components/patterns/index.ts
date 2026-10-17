@@ -9,3 +9,5 @@ export * from './ToastContext.js';
 export * from './MetricCard.js';
 export * from './Timeline.js';
 export * from './Charts.js';
+export * from './FormSection.js';
+export * from './CommandPalette.js';

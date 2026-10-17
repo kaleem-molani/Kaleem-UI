@@ -214,29 +214,39 @@ colors and arbitrary one-off visual styles.
 -   Destructive action is visually distinct but not the default for
     ordinary confirmation.
 
-### CommandMenu
+### CommandPalette (Cmd+K)
 
--   Only add if a real application needs keyboard-first command
-    discovery.
--   Searchable, accessible, and documented.
+- Keyboard-first command discovery and instant action launcher (`open`, `onClose`, `items`).
+- Searchable, accessible (`role="combobox"`, `role="listbox"`), and grouped by category.
+- Supports keyboard navigation (`ArrowUp`, `ArrowDown`, `Enter`, `Escape`) and `<Kbd>` shortcut chips.
 
-## P3 --- Optional patterns after v1
+### Drawer (Sheet)
 
--   KPI/Metric display
--   Chart container and legend
--   Settings section
--   Multi-step workflow
--   Onboarding checklist
--   Notification center
--   Date/time controls
--   File upload
--   Rich data filters
--   Split panel
--   Activity timeline
+- Slide-over side panel (`position="right | left"`, `size="sm | md | lg | xl | full"`).
+- Spring animation with backdrop blur, sticky header, scrollable body, and sticky actions footer.
+- Keyboard accessible with Escape-key dismiss, backdrop click, and body scroll lock.
 
-Do not ship charting, date picker, rich text, or file upload primitives
-until a real product need and suitable dependency choice are
-established.
+### SegmentedControl
+
+- Compact, low-clutter selection pills for 2–5 options with `role="radiogroup"`.
+- Keyboard arrow navigation (`ArrowLeft`, `ArrowRight`, `Home`, `End`), active pill indicator.
+- Replaces vertical radio buttons in modern dashboards and form modals.
+
+### FormSection
+
+- Visual grouping container (`variant="card | plain | inset"`, `columns={1 | 2 | 3}`).
+- Inset surface contrast, icon badge chip, title, description, and responsive grid layout.
+
+### BulkActionsBar
+
+- Floating bottom-center pill bar for multi-row batch actions when table rows are selected.
+- Displays selected count badge, action buttons, and deselect trigger with backdrop blur.
+
+### Kbd
+
+- Tactile 3D beveled keyboard shortcut badge (`⌘K`, `Ctrl+S`, `Esc`, `Enter`).
+- Font-mono typography with subtle bottom-border bevel and theme contrast.
+
 
 ## Component contribution checklist
 

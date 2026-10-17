@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { Badge, Button, IconButton, Checkbox, InlineAlert, Pagination } from '../primitives';
-import { SkeletonTable } from '@kaleemmolani/react';
+import {
+  SkeletonTable,
+  Drawer,
+  BulkActionsBar,
+  SegmentedControl,
+  FormSection,
+  Input,
+  useToast,
+} from '@kaleemmolani/react';
 
 
 import {
@@ -91,6 +99,9 @@ export const DataTablePattern: React.FC<{
   const [pageSize, setPageSize] = useState(3);
   const [sortField, setSortField] = useState<'name' | 'environment' | 'createdDate'>('name');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [inspectingItem, setInspectingItem] = useState<SecretItem | null>(null);
+  const [tableDensity, setTableDensity] = useState<'compact' | 'balanced' | 'comfortable'>('balanced');
+  const toast = useToast();
 
   const filteredData = data.filter((item) => {
     const matchesSearch =
@@ -266,6 +277,16 @@ export const DataTablePattern: React.FC<{
               </button>
             ))}
           </div>
+          <SegmentedControl<'compact' | 'balanced' | 'comfortable'>
+            size="sm"
+            value={tableDensity}
+            onChange={setTableDensity}
+            options={[
+              { value: 'compact', label: 'Compact' },
+              { value: 'balanced', label: 'Balanced' },
+              { value: 'comfortable', label: 'Comfortable' },
+            ]}
+          />
 
           <Button
             variant="primary"
@@ -469,6 +490,13 @@ export const DataTablePattern: React.FC<{
                       </td>
                       <td style={{ padding: 'var(--kui-space-3) var(--kui-space-4)', textAlign: 'right' }}>
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setInspectingItem(item)}
+                          >
+                            Inspect
+                          </Button>
                           {item.status !== 'Revoked' ? (
                             <Button
                               variant="ghost"
@@ -525,6 +553,139 @@ export const DataTablePattern: React.FC<{
           />
         </div>
       </div>
+
+      {/* Floating Bulk Actions Bar */}
+      <BulkActionsBar
+        selectedCount={selectedIds.length}
+        onClearSelection={() => setSelectedIds([])}
+        actions={
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                toast.info(`Exported ${selectedIds.length} credentials as CSV`);
+              }}
+            >
+              Export CSV
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => {
+                setData((prev) =>
+                  prev.map((k) => (selectedIds.includes(k.id) ? { ...k, status: 'Revoked' } : k))
+                );
+                toast.warning(`Revoked ${selectedIds.length} credentials`);
+                setSelectedIds([]);
+              }}
+            >
+              Revoke Selected
+            </Button>
+          </>
+        }
+      />
+
+      {/* Slide-over Inspect Drawer */}
+      <Drawer
+        open={Boolean(inspectingItem)}
+        onClose={() => setInspectingItem(null)}
+        title={inspectingItem?.name}
+        description="Inspect cryptographic payload, execution scopes, and automated rotation schedule."
+        icon={<KeyIcon size={18} />}
+        badge={
+          inspectingItem ? (
+            <Badge
+              variant={
+                inspectingItem.status === 'Active'
+                  ? 'success'
+                  : inspectingItem.status === 'Expiring'
+                  ? 'warning'
+                  : 'danger'
+              }
+              size="sm"
+            >
+              {inspectingItem.status}
+            </Badge>
+          ) : undefined
+        }
+        footer={
+          <>
+            <Button variant="ghost" size="sm" onClick={() => setInspectingItem(null)}>
+              Close
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              leadingIcon={<CopyIcon size={14} />}
+              onClick={() => {
+                if (inspectingItem) {
+                  navigator.clipboard?.writeText(inspectingItem.prefix);
+                  toast.success(`Copied ${inspectingItem.prefix} to clipboard`);
+                }
+              }}
+            >
+              Copy Fingerprint
+            </Button>
+          </>
+        }
+      >
+        {inspectingItem && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--kui-space-4)' }}>
+            <FormSection
+              title="Identity & Prefix"
+              description="Public credential handle for service-to-service discovery."
+              variant="card"
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--kui-space-2)' }}>
+                <span style={{ fontSize: 'var(--kui-font-size-xs)', color: 'var(--kui-color-text-secondary)' }}>
+                  Prefix Fingerprint:
+                </span>
+                <code
+                  style={{
+                    backgroundColor: 'var(--kui-color-surface)',
+                    padding: '8px 12px',
+                    borderRadius: 'var(--kui-radius-sm)',
+                    border: '1px solid var(--kui-color-border)',
+                    fontSize: '13px',
+                    fontFamily: 'var(--kui-font-mono)',
+                    color: 'var(--kui-color-brand-primary)',
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
+                  {inspectingItem.prefix}_94829adbf8204e84
+                </code>
+              </div>
+            </FormSection>
+
+            <FormSection
+              title="Execution Environment"
+              description="Network perimeter security classification."
+              variant="card"
+              columns={2}
+            >
+              <Input label="Target Tier" value={inspectingItem.environment} readOnly />
+              <Input label="Current Status" value={inspectingItem.status} readOnly />
+              <Input label="Created Date" value={inspectingItem.createdDate} readOnly />
+              <Input label="Last Ingestion Activity" value={inspectingItem.lastUsed} readOnly />
+            </FormSection>
+
+            <FormSection
+              title="Rate Limit & Throttling Policy"
+              description="Runtime quotas enforced per microservice edge node."
+              variant="card"
+            >
+              <Input
+                label="Maximum Throughput"
+                size="hero"
+                value="5,000"
+                readOnly
+                trailingAddon={<Badge variant="info">req / min</Badge>}
+              />
+            </FormSection>
+          </div>
+        )}
+      </Drawer>
     </div>
   );
 };

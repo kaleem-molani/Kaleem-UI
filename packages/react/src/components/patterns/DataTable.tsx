@@ -21,6 +21,8 @@ export interface DataTableColumn<T> {
 
 export type DataTableHeightMode = 'auto' | 'fill' | 'fixed';
 
+export type DataTableDensity = 'compact' | 'balanced' | 'comfortable';
+
 export interface DataTableProps<T> {
   columns: DataTableColumn<T>[];
   data: T[];
@@ -35,6 +37,8 @@ export interface DataTableProps<T> {
   sortConfig?: SortConfig;
   onSortChange?: (sortConfig: SortConfig) => void;
   pagination?: React.ReactNode;
+  density?: DataTableDensity;
+  bulkActions?: React.ReactNode;
   /**
    * Sizing strategy for the table's vertical height:
    * - 'auto' (default): Collapses and adjusts height dynamically to fit the number of rows.
@@ -78,6 +82,8 @@ export function DataTable<T>({
   sortConfig,
   onSortChange,
   pagination,
+  density = 'balanced',
+  bulkActions,
   heightMode = 'auto',
   fullHeight = false,
   height,
@@ -102,6 +108,24 @@ export function DataTable<T>({
       : height;
 
   const containerMinHeight = minHeight ?? (isFill ? '320px' : undefined);
+
+  const cellPaddings: Record<DataTableDensity, string> = {
+    compact: '6px 12px',
+    balanced: '12px 14px',
+    comfortable: '16px 18px',
+  };
+
+  const headerPaddings: Record<DataTableDensity, string> = {
+    compact: '6px 12px',
+    balanced: '10px 14px',
+    comfortable: '14px 18px',
+  };
+
+  const fontSizes: Record<DataTableDensity, string> = {
+    compact: '0.8125rem',
+    balanced: 'var(--kui-font-size-sm)',
+    comfortable: '0.9375rem',
+  };
 
   const allSelected = data.length > 0 && selectedKeys.length === data.length;
   const someSelected = selectedKeys.length > 0 && selectedKeys.length < data.length;
@@ -146,6 +170,7 @@ export function DataTable<T>({
   return (
     <div
       data-height-mode={effectiveHeightMode}
+      data-density={density}
       style={{
         width: '100%',
         height: containerHeight,
@@ -158,6 +183,7 @@ export function DataTable<T>({
         backgroundColor: 'var(--kui-color-surface)',
         overflow: 'hidden',
         boxSizing: 'border-box',
+        position: 'relative',
         ...style,
       }}
     >
@@ -175,8 +201,9 @@ export function DataTable<T>({
           style={{
             width: '100%',
             borderCollapse: 'collapse',
-            fontSize: 'var(--kui-font-size-sm)',
+            fontSize: fontSizes[density],
             fontFamily: 'var(--kui-font-sans)',
+            fontVariantNumeric: 'tabular-nums',
             textAlign: 'left',
           }}
         >
@@ -195,7 +222,7 @@ export function DataTable<T>({
               }}
             >
             {selectable && (
-              <th style={{ width: '44px', padding: '10px 12px', textAlign: 'center' }}>
+              <th style={{ width: '44px', padding: headerPaddings[density], textAlign: 'center' }}>
                 <Checkbox
                   checked={allSelected}
                   indeterminate={someSelected}
@@ -220,7 +247,7 @@ export function DataTable<T>({
                   scope="col"
                   aria-sort={sortAria}
                   style={{
-                    padding: col.sortable ? '6px 8px' : '10px 14px',
+                    padding: col.sortable ? '4px 6px' : headerPaddings[density],
                     fontWeight: 'var(--kui-font-weight-semibold)',
                     color: 'var(--kui-color-text-secondary)',
                     fontSize: 'var(--kui-font-size-xs)',
@@ -333,7 +360,7 @@ export function DataTable<T>({
                   }}
                 >
                   {selectable && (
-                    <td style={{ width: '44px', padding: '12px', textAlign: 'center' }}>
+                    <td style={{ width: '44px', padding: cellPaddings[density], textAlign: 'center' }}>
                       <Checkbox
                         checked={isSelected}
                         onChange={(e) => handleSelectRow(rowKey, e.target.checked)}
@@ -345,7 +372,7 @@ export function DataTable<T>({
                     <td
                       key={col.key}
                       style={{
-                        padding: '12px 14px',
+                        padding: cellPaddings[density],
                         color: 'var(--kui-color-text-primary)',
                         textAlign: col.align || 'left',
                       }}
@@ -377,9 +404,122 @@ export function DataTable<T>({
           {pagination}
         </div>
       )}
+      {bulkActions && selectedKeys.length > 0 && bulkActions}
     </div>
   );
 }
+
+/* ----------------------------------------------------
+   BulkActionsBar
+---------------------------------------------------- */
+export interface BulkActionsBarProps {
+  selectedCount: number;
+  onClearSelection?: () => void;
+  actions?: React.ReactNode;
+  children?: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+export const BulkActionsBar: React.FC<BulkActionsBarProps> = ({
+  selectedCount,
+  onClearSelection,
+  actions,
+  children,
+  className = '',
+  style,
+}) => {
+  if (selectedCount <= 0) return null;
+
+  return (
+    <div
+      role="region"
+      aria-label="Bulk actions bar"
+      style={{
+        position: 'fixed',
+        bottom: '24px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 40,
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 'var(--kui-space-3)',
+        padding: '6px 14px',
+        backgroundColor: 'var(--kui-color-surface)',
+        border: '1px solid var(--kui-color-border-strong)',
+        borderRadius: 'var(--kui-radius-full)',
+        boxShadow: 'var(--kui-shadow-lg), 0 8px 32px rgba(0, 0, 0, 0.18)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        animation: 'kui-scale-in 180ms cubic-bezier(0.16, 1, 0.3, 1)',
+        fontFamily: 'var(--kui-font-sans)',
+        ...style,
+      }}
+      className={`kui-bulk-actions-bar ${className}`}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 'var(--kui-space-2)',
+          fontSize: 'var(--kui-font-size-xs)',
+          fontWeight: 'var(--kui-font-weight-medium)',
+          color: 'var(--kui-color-text-primary)',
+          paddingRight: 'var(--kui-space-2)',
+          borderRight: '1px solid var(--kui-color-border)',
+        }}
+      >
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '2px 8px',
+            borderRadius: 'var(--kui-radius-full)',
+            backgroundColor: 'var(--kui-color-surface-subtle)',
+            border: '1px solid var(--kui-color-border)',
+            fontWeight: 700,
+            fontSize: '11px',
+            color: 'var(--kui-color-brand-primary)',
+            fontVariantNumeric: 'tabular-nums',
+          }}
+        >
+          {selectedCount}
+        </span>
+        <span>selected</span>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--kui-space-2)' }}>
+        {actions || children}
+      </div>
+
+      {onClearSelection && (
+        <button
+          type="button"
+          onClick={onClearSelection}
+          style={{
+            all: 'unset',
+            fontSize: 'var(--kui-font-size-xs)',
+            color: 'var(--kui-color-text-muted)',
+            cursor: 'pointer',
+            padding: '2px 6px',
+            borderRadius: 'var(--kui-radius-sm)',
+            transition: 'color 100ms ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = 'var(--kui-color-text-primary)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = 'var(--kui-color-text-muted)';
+          }}
+        >
+          Deselect
+        </button>
+      )}
+    </div>
+  );
+};
+
 
 export function paginateAndSortData<T>(
   items: T[],

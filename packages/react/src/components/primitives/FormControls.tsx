@@ -1,30 +1,67 @@
-import React, { useId } from 'react';
+import React, { useId, useState } from 'react';
 import { ChevronDownIcon, CheckIcon } from '../common/Icons.js';
 
 /* ----------------------------------------------------
    TextInput
 ---------------------------------------------------- */
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string;
   description?: string;
   error?: string;
+  size?: 'sm' | 'md' | 'lg' | 'hero';
+  inputSize?: 'sm' | 'md' | 'lg' | 'hero';
+  leadingAddon?: React.ReactNode;
+  trailingAddon?: React.ReactNode;
 }
 
 export const Input: React.FC<InputProps> = ({
   label,
   description,
   error,
+  size,
+  inputSize,
+  leadingAddon,
+  trailingAddon,
   id: customId,
   required,
   disabled,
   style,
   className = '',
+  onFocus,
+  onBlur,
   ...props
 }) => {
+  const [isFocused, setIsFocused] = useState(false);
   const generatedId = useId();
   const id = customId || generatedId;
   const descriptionId = `${id}-description`;
   const errorId = `${id}-error`;
+
+  const sizeEffective = size || inputSize || 'md';
+
+  const heights: Record<'sm' | 'md' | 'lg' | 'hero', string> = {
+    sm: '32px',
+    md: '38px',
+    lg: '46px',
+    hero: '58px',
+  };
+
+  const radii: Record<'sm' | 'md' | 'lg' | 'hero', string> = {
+    sm: 'var(--kui-radius-sm)',
+    md: 'var(--kui-radius-md)',
+    lg: 'var(--kui-radius-md)',
+    hero: 'var(--kui-radius-lg)',
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setIsFocused(true);
+    onFocus?.(e);
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setIsFocused(false);
+    onBlur?.(e);
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--kui-space-1)', width: '100%' }}>
@@ -55,28 +92,102 @@ export const Input: React.FC<InputProps> = ({
         </p>
       )}
 
-      <input
-        id={id}
-        required={required}
-        disabled={disabled}
-        aria-invalid={Boolean(error)}
-        aria-describedby={[description ? descriptionId : null, error ? errorId : null].filter(Boolean).join(' ') || undefined}
+      <div
+        className="kui-input-container"
         style={{
-          height: '38px',
-          padding: '0 var(--kui-space-3)',
+          display: 'flex',
+          alignItems: 'center',
+          height: heights[sizeEffective],
           backgroundColor: 'var(--kui-color-surface)',
-          color: 'var(--kui-color-text-primary)',
-          border: `1px solid ${error ? 'var(--kui-color-danger)' : 'var(--kui-color-border)'}`,
-          borderRadius: 'var(--kui-radius-md)',
-          fontSize: 'var(--kui-font-size-sm)',
-          transition: 'border-color var(--kui-motion-duration-fast) var(--kui-motion-ease-standard)',
-          outline: 'none',
+          border: `1px solid ${error ? 'var(--kui-color-danger)' : isFocused ? 'var(--kui-color-brand-primary)' : 'var(--kui-color-border)'}`,
+          borderRadius: radii[sizeEffective],
+          boxShadow: isFocused
+            ? error
+              ? '0 0 0 3px rgba(180, 35, 24, 0.2)'
+              : '0 0 0 3px rgba(131, 240, 192, 0.28)'
+            : undefined,
+          transition: 'border-color var(--kui-motion-duration-fast) var(--kui-motion-ease-standard), box-shadow var(--kui-motion-duration-fast) var(--kui-motion-ease-standard)',
+          opacity: disabled ? 0.6 : 1,
+          cursor: disabled ? 'not-allowed' : 'text',
+          overflow: 'hidden',
           width: '100%',
-          ...style,
         }}
-        className={`kui-input ${className}`}
-        {...props}
-      />
+      >
+        {leadingAddon && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingLeft: sizeEffective === 'hero' ? 'var(--kui-space-4)' : 'var(--kui-space-3)',
+              paddingRight: 'var(--kui-space-2)',
+              color: isFocused ? 'var(--kui-color-brand-primary)' : 'var(--kui-color-text-secondary)',
+              flexShrink: 0,
+              userSelect: 'none',
+            }}
+          >
+            {leadingAddon}
+          </div>
+        )}
+
+        <input
+          id={id}
+          required={required}
+          disabled={disabled}
+          aria-invalid={Boolean(error)}
+          aria-describedby={[description ? descriptionId : null, error ? errorId : null].filter(Boolean).join(' ') || undefined}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          style={{
+            flex: 1,
+            minWidth: 0,
+            height: '100%',
+            padding: leadingAddon
+              ? trailingAddon
+                ? '0'
+                : `0 ${sizeEffective === 'hero' ? 'var(--kui-space-4)' : 'var(--kui-space-3)'} 0 0`
+              : trailingAddon
+              ? `0 0 0 ${sizeEffective === 'hero' ? 'var(--kui-space-4)' : 'var(--kui-space-3)'}`
+              : `0 ${sizeEffective === 'hero' ? 'var(--kui-space-4)' : 'var(--kui-space-3)'}`,
+            backgroundColor: 'transparent',
+            color: 'var(--kui-color-text-primary)',
+            border: 'none',
+            fontSize:
+              sizeEffective === 'hero'
+                ? 'var(--kui-font-size-2xl)'
+                : sizeEffective === 'lg'
+                ? 'var(--kui-font-size-md)'
+                : sizeEffective === 'sm'
+                ? 'var(--kui-font-size-xs)'
+                : 'var(--kui-font-size-sm)',
+            fontWeight: sizeEffective === 'hero' ? 'var(--kui-font-weight-bold)' : 'inherit',
+            fontVariantNumeric: 'tabular-nums',
+            letterSpacing: sizeEffective === 'hero' ? '-0.02em' : 'inherit',
+            outline: 'none',
+            width: '100%',
+            ...style,
+          }}
+          className={`kui-input ${className}`}
+          {...props}
+        />
+
+        {trailingAddon && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingRight: sizeEffective === 'hero' ? 'var(--kui-space-4)' : 'var(--kui-space-3)',
+              paddingLeft: 'var(--kui-space-2)',
+              color: 'var(--kui-color-text-secondary)',
+              flexShrink: 0,
+              userSelect: 'none',
+            }}
+          >
+            {trailingAddon}
+          </div>
+        )}
+      </div>
 
       {error && (
         <p id={errorId} role="alert" style={{ fontSize: 'var(--kui-font-size-xs)', color: 'var(--kui-color-danger)', margin: 0 }}>
