@@ -14,7 +14,11 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
+
     "build": "tsc -b",
     "test": "node scripts/verify-primitives.js",
     "clean": "rm -rf dist"

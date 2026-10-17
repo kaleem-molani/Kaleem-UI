@@ -18,7 +18,11 @@
     "src/themes.css",
     "src/tokens.json"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
+
     "build": "tsc -b",
     "test": "node scripts/verify-contrast.js",
     "clean": "rm -rf dist"
